@@ -92,6 +92,17 @@
   .bb-depth-btn .dbi { font-size:1rem; }
   .bb-depth-btn:hover { border-color:#4a7a4a; }
   .bb-depth-btn.sel { border-color:var(--cyan); background:#0e2428; color:var(--cyan); box-shadow:0 0 10px rgba(56,217,192,0.3); }
+  .bb-step-indicator { display:flex; gap:6px; margin-bottom:10px; }
+  .bb-step { flex:1; text-align:center; padding:5px 4px; border-radius:8px; font-size:0.6rem; font-weight:900; text-transform:uppercase; letter-spacing:1px; border:2px solid var(--rim); color:var(--muted); background:var(--ink); }
+  .bb-step.active { border-color:var(--lime); color:var(--lime); background:#0e2010; }
+  .bb-step.done { border-color:var(--rim); color:var(--muted); background:rgba(109,219,74,0.07); }
+  .bb-confirm-btn { width:100%; padding:10px; background:linear-gradient(160deg,#6ddb4a,#2a7a18); border:none;
+    border-radius:12px; font-family:'Nunito',sans-serif; font-weight:900; font-size:0.9rem;
+    color:#061206; cursor:pointer; margin-top:8px; box-shadow:0 3px 0 #145010;
+    transition:filter 0.1s,transform 0.1s; display:none; }
+  .bb-confirm-btn.show { display:block; }
+  .bb-confirm-btn:hover { filter:brightness(1.1); transform:translateY(-1px); }
+  .bb-confirm-btn:active { transform:translateY(1px); }
 
   /* ── DISTANCE HUD (fish fight) ── */
   #dist-hud {
@@ -126,18 +137,50 @@
   @keyframes reelPulse { from{box-shadow:3px 4px 0 #6a0a0a,4px 6px 18px rgba(245,80,80,0.35)} to{box-shadow:3px 4px 0 #6a0a0a,4px 6px 28px rgba(245,80,80,0.7)} }
   @keyframes reelActive { from{transform:translateX(4px) scale(1.06)} to{transform:translateX(6px) scale(1.1)} }
 
-  /* ── ENCYCLOPAEDIA PANEL ── */
-  #encyc-panel { display:none; position:fixed; top:var(--hdr); bottom:var(--ftr); right:0; width:min(340px,92vw); background:var(--panel); border-left:3px solid var(--rim); z-index:98; overflow-y:auto; animation:slideIn 0.22s cubic-bezier(0.34,1.2,0.64,1); }
-  #encyc-panel.show { display:block; }
-  @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
-  #encyc-panel::-webkit-scrollbar { width:4px; }
-  #encyc-panel::-webkit-scrollbar-track { background:var(--ink); }
-  #encyc-panel::-webkit-scrollbar-thumb { background:var(--rim); border-radius:2px; }
-  .ep-header { position:sticky; top:0; background:var(--panel); border-bottom:2px solid var(--rim); padding:14px 16px 12px; display:flex; align-items:center; justify-content:space-between; z-index:1; }
-  .ep-title { font-family:'Black Han Sans',sans-serif; font-size:1.1rem; letter-spacing:2px;
-    background:linear-gradient(135deg,var(--gold),var(--lime)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-  .ep-close { width:30px; height:30px; background:var(--ink); border:2px solid var(--rim); border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1rem; color:var(--muted); transition:all 0.15s; }
-  .ep-close:hover { border-color:var(--red); color:var(--red); }
+  /* ── TENSION BAR ── */
+  #tension-hud {
+    display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+    width:min(340px,88vw); background:rgba(0,0,0,0.78); border:2px solid rgba(255,255,255,0.15);
+    border-radius:14px; padding:10px 16px 12px; z-index:98; pointer-events:none;
+    box-shadow:0 4px 24px rgba(0,0,0,0.6); backdrop-filter:blur(6px);
+    transition:border-color 0.2s;
+  }
+  #tension-hud.show { display:block; }
+  #tension-hud.danger { border-color:rgba(240,69,69,0.7); animation:tensionPulse 0.4s infinite alternate; }
+  @keyframes tensionPulse { from{box-shadow:0 4px 24px rgba(0,0,0,0.6)} to{box-shadow:0 4px 30px rgba(240,69,69,0.5)} }
+  #tension-label { font-size:0.62rem; font-weight:900; text-transform:uppercase; letter-spacing:2px; color:rgba(255,255,255,0.6); margin-bottom:6px; text-align:center; }
+  #tension-track { width:100%; height:22px; background:rgba(255,255,255,0.07); border-radius:8px; overflow:hidden; position:relative; }
+  #tension-fill {
+    height:100%; border-radius:8px; width:0%;
+    background:linear-gradient(to right,#3ddb3d 0%,#f0c040 45%,#f07830 75%,#f04545 100%);
+    background-size:340px 100%; background-position:0 0;
+    transition:width 0.12s ease-out;
+    position:relative;
+  }
+  #tension-fill::after { content:attr(data-pct); position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:0.78rem; font-weight:900; color:#fff; white-space:nowrap; }
+  #tension-warn { text-align:center; font-size:0.72rem; font-weight:900; color:#ff5050; height:18px; margin-top:4px; }
+
+  /* ── UNIFIED SIDE PANEL ── */
+  #side-panel { display:none; position:fixed; top:var(--hdr); bottom:var(--ftr); right:0; width:min(360px,95vw);
+    background:var(--panel); border-left:3px solid var(--rim); z-index:98; overflow:hidden;
+    animation:slideIn 0.22s cubic-bezier(0.34,1.2,0.64,1); flex-direction:column; }
+  #side-panel.show { display:flex; }
+  #sp-content { flex:1; overflow-y:auto; }
+  #sp-content::-webkit-scrollbar { width:4px; }
+  #sp-content::-webkit-scrollbar-track { background:var(--ink); }
+  #sp-content::-webkit-scrollbar-thumb { background:var(--rim); border-radius:2px; }
+  .sp-header { position:sticky; top:0; background:var(--panel); border-bottom:2px solid var(--rim);
+    padding:10px 12px 0; display:flex; align-items:flex-end; justify-content:space-between; z-index:1; flex-shrink:0; }
+  .sp-tabs { display:flex; gap:2px; }
+  .sp-tab { background:transparent; border:2px solid var(--rim); border-bottom:none; border-radius:8px 8px 0 0;
+    padding:7px 12px; font-family:'Nunito',sans-serif; font-size:0.72rem; font-weight:900; letter-spacing:0.5px;
+    color:var(--muted); cursor:pointer; transition:all 0.15s; }
+  .sp-tab:hover { background:#1e321e; color:var(--txt); }
+  .sp-tab.active { background:var(--ink); border-color:var(--lime); color:var(--lime); }
+  .sp-close { width:30px; height:30px; background:var(--ink); border:2px solid var(--rim); border-radius:8px;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1rem; color:var(--muted);
+    transition:all 0.15s; margin-bottom:2px; }
+  .sp-close:hover { border-color:var(--red); color:var(--red); }
   .ep-fish-card { margin:10px; background:var(--ink); border:2px solid var(--rim); border-radius:14px; overflow:hidden; transition:border-color 0.2s,box-shadow 0.2s; }
   .ep-fish-card:hover { border-color:#4a7a4a; box-shadow:0 4px 16px rgba(109,219,74,0.1); }
   .ep-fish-top { display:flex; align-items:center; gap:12px; padding:12px 14px 10px; }
@@ -164,19 +207,7 @@
   .ep-bait-chip.fav { border-color:var(--gold); background:rgba(240,192,64,0.12); color:var(--gold); }
   .ep-bait-chip .chip-star { font-size:0.6rem; }
 
-  /* ── SHOP PANEL ── */
-  #shop-panel { display:none; position:fixed; top:var(--hdr); bottom:var(--ftr); right:0; width:min(360px,95vw);
-    background:var(--panel); border-left:3px solid #6633aa; z-index:98; overflow-y:auto;
-    animation:slideIn 0.22s cubic-bezier(0.34,1.2,0.64,1); }
-  #shop-panel.show { display:block; }
-  #shop-panel::-webkit-scrollbar { width:4px; }
-  #shop-panel::-webkit-scrollbar-track { background:var(--ink); }
-  #shop-panel::-webkit-scrollbar-thumb { background:#6633aa; border-radius:2px; }
-  .shop-header { position:sticky; top:0; background:var(--panel); border-bottom:2px solid #6633aa; padding:14px 16px 12px; display:flex; align-items:center; justify-content:space-between; z-index:1; }
-  .shop-title { font-family:'Black Han Sans',sans-serif; font-size:1.1rem; letter-spacing:2px;
-    background:linear-gradient(135deg,#cc88ff,#8844cc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-  .shop-close { width:30px; height:30px; background:var(--ink); border:2px solid var(--rim); border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1rem; color:var(--muted); transition:all 0.15s; }
-  .shop-close:hover { border-color:var(--red); color:var(--red); }
+  @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
   .shop-balance { margin:12px 12px 4px; background:rgba(240,192,64,0.1); border:1px solid rgba(240,192,64,0.3); border-radius:12px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; }
   .shop-balance-lbl { font-size:0.65rem; font-weight:900; text-transform:uppercase; letter-spacing:2px; color:var(--muted); }
   .shop-balance-val { font-size:1.1rem; font-weight:900; color:var(--gold); }
@@ -195,30 +226,153 @@
   .shop-buy-btn:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
   .shop-divider { height:2px; background:var(--rim); margin:10px 14px; border-radius:1px; }
 
+  /* ── SHOP FILTER TABS ── */
+  .shop-filters { display:flex; gap:6px; padding:10px 12px 4px; flex-wrap:wrap; }
+  .shop-filter-btn { display:flex; align-items:center; gap:5px; padding:6px 12px; background:var(--ink);
+    border:2px solid var(--rim); border-radius:20px; font-family:'Nunito',sans-serif; font-weight:900;
+    font-size:0.7rem; color:var(--muted); cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+  .shop-filter-btn:hover { border-color:#6633aa; color:var(--txt); }
+  .shop-filter-btn.active { background:rgba(136,85,204,0.18); border-color:#8855cc; color:#cc99ff; box-shadow:0 0 10px rgba(136,85,204,0.3); }
+
   /* ── TOAST ── */
-  #toast { position:fixed; top:calc(var(--hdr)+10px); left:50%; transform:translateX(-50%) translateY(-4px);
-    background:#0e200e; border:2px solid var(--lime); border-radius:20px; padding:7px 18px;
-    font-size:0.82rem; font-weight:700; pointer-events:none; opacity:0; transition:opacity 0.25s,transform 0.25s;
-    z-index:110; white-space:nowrap; color:var(--lime); box-shadow:0 4px 20px rgba(109,219,74,0.3); }
+  #toast { position:fixed; top:calc(var(--hdr)+16px); left:50%; transform:translateX(-50%) translateY(-8px);
+    background:rgba(10,22,11,0.92); border:2px solid var(--lime); border-radius:24px; padding:9px 22px;
+    font-size:0.88rem; font-weight:700; pointer-events:none; opacity:0; transition:opacity 0.22s,transform 0.22s;
+    z-index:110; white-space:nowrap; color:var(--lime); box-shadow:0 6px 28px rgba(0,0,0,0.6),0 0 0 1px rgba(109,219,74,0.15);
+    backdrop-filter:blur(8px); max-width:calc(100vw - 32px); text-align:center; }
   #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-  /* ── MODAL ── */
-  #modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.82); z-index:200; justify-content:center; align-items:center; }
+  /* ── CATCH CARD MODAL ── */
+  #modal {
+    display:none; position:fixed; inset:0; z-index:200;
+    justify-content:center; align-items:center; padding:16px;
+    background: radial-gradient(ellipse at 50% 40%, rgba(4,28,48,0.97) 0%, rgba(0,0,0,0.97) 100%);
+  }
   #modal.show { display:flex; }
-  .modal-box { background:var(--panel); border:3px solid var(--rim); border-radius:20px; padding:30px 28px; max-width:340px; width:90%; text-align:center; box-shadow:0 24px 64px rgba(0,0,0,0.8); animation:popIn 0.28s cubic-bezier(0.34,1.56,0.64,1); }
-  @keyframes popIn { from{opacity:0;transform:scale(0.65)} to{opacity:1;transform:scale(1)} }
-  .modal-fish-emoji { font-size:5rem; line-height:1.1; }
-  .modal-fish-name { font-family:'Black Han Sans',sans-serif; font-size:1.6rem; letter-spacing:2px;
-    background:linear-gradient(135deg,var(--gold),var(--lime)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin:8px 0; }
-  .modal-stats { font-size:0.9rem; color:var(--muted); margin-bottom:22px; line-height:2; }
-  .modal-stats b { color:var(--txt); }
-  .modal-btns { display:flex; gap:10px; justify-content:center; }
-  .gbtn { display:inline-flex; align-items:center; gap:6px; padding:0 20px; height:52px; border:none; border-radius:12px; font-family:'Nunito',sans-serif; font-weight:900; font-size:0.95rem; letter-spacing:0.5px; cursor:pointer; white-space:nowrap; transition:transform 0.1s,filter 0.1s; position:relative; flex-shrink:0; }
-  .gbtn::after { content:''; position:absolute; bottom:0; left:6px; right:6px; height:3px; border-radius:0 0 8px 8px; background:rgba(0,0,0,0.35); }
-  .gbtn:hover { filter:brightness(1.12); transform:translateY(-2px); }
-  .gbtn:active { transform:translateY(1px) scale(0.97); filter:brightness(0.95); }
-  .gbtn-lime { background:linear-gradient(160deg,#4fc92e,#2e8a18); color:#0a1a06; box-shadow:0 4px 0 #1a5a0a,0 6px 16px rgba(78,201,46,0.35); }
-  .gbtn-gold { background:linear-gradient(160deg,#f5c842,#c07a0a); color:#1a0a00; box-shadow:0 4px 0 #7a4a00,0 6px 16px rgba(245,200,66,0.3); }
+
+  .catch-card {
+    background: linear-gradient(170deg,#0a1e2a 0%,#081610 60%,#0c1a0e 100%);
+    border:2px solid rgba(56,217,192,0.3);
+    border-radius:26px; max-width:360px; width:100%; overflow:hidden;
+    box-shadow: 0 0 0 1px rgba(56,217,192,0.08), 0 0 50px rgba(56,217,192,0.1), 0 40px 80px rgba(0,0,0,0.9);
+    animation: catchPop 0.45s cubic-bezier(0.34,1.4,0.64,1) both;
+  }
+  @keyframes catchPop {
+    0%  { opacity:0; transform:scale(0.55) translateY(50px); }
+    100%{ opacity:1; transform:scale(1)    translateY(0); }
+  }
+
+  /* Art area */
+  .catch-card-art {
+    position:relative; height:190px;
+    background: linear-gradient(180deg,#041622 0%,#062036 50%,#08243e 100%);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .catch-card-art::before {
+    content:''; position:absolute; inset:0;
+    background: radial-gradient(ellipse at 50% 65%, rgba(56,217,192,0.14) 0%, transparent 60%);
+    animation: artGlow 2.8s ease-in-out infinite;
+  }
+  @keyframes artGlow { 0%,100%{opacity:0.7} 50%{opacity:1.2} }
+  .catch-card-art::after {
+    content:''; position:absolute; bottom:0; left:0; right:0; height:60px;
+    background: linear-gradient(0deg, rgba(8,22,14,0.95) 0%, transparent 100%);
+    pointer-events:none;
+  }
+
+  /* Animated water ripple lines */
+  .catch-card-water {
+    position:absolute; bottom:0; left:0; right:0; height:70px; overflow:hidden;
+  }
+  .catch-card-water::before, .catch-card-water::after {
+    content:''; position:absolute; left:-60%; width:220%; height:1.5px;
+    background: linear-gradient(90deg, transparent 0%, rgba(56,217,192,0.35) 40%, rgba(109,219,74,0.2) 60%, transparent 100%);
+    animation: waveScroll 4s linear infinite;
+  }
+  .catch-card-water::before { bottom:28px; }
+  .catch-card-water::after  { bottom:14px; animation-duration:5.5s; animation-delay:-2s; opacity:0.6; }
+  @keyframes waveScroll { from{transform:translateX(0)} to{transform:translateX(45.5%)} }
+
+  #catch-fish-canvas { position:relative; z-index:1; display:block; }
+
+  .catch-pb-badge {
+    position:absolute; top:0; left:50%; transform:translateX(-50%) translateY(-1px);
+    background: linear-gradient(135deg,#f0c040,#b86a00);
+    border-radius:0 0 14px 14px; padding:5px 20px 7px;
+    font-size:0.7rem; font-weight:900; letter-spacing:2px; text-transform:uppercase;
+    color:#1a0800; z-index:3;
+    box-shadow: 0 4px 16px rgba(240,160,0,0.5);
+    animation: badgeDrop 0.4s cubic-bezier(0.34,1.5,0.64,1) 0.3s both;
+  }
+  @keyframes badgeDrop { from{opacity:0;transform:translateX(-50%) translateY(-20px)} to{opacity:1;transform:translateX(-50%) translateY(-1px)} }
+
+  /* Card body */
+  .catch-card-body { padding:18px 20px 20px; }
+
+  .catch-fish-name {
+    font-family:'Black Han Sans',sans-serif; font-size:1.9rem; letter-spacing:3px;
+    text-align:center; line-height:1; margin-bottom:3px;
+    background: linear-gradient(135deg,#f0c040 0%,#6ddb4a 55%,#38d9c0 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    animation: fadeUp 0.3s ease-out 0.15s both;
+  }
+  .catch-fish-latin {
+    text-align:center; font-size:0.66rem; color:rgba(122,170,122,0.65);
+    font-style:italic; margin-bottom:16px;
+    animation: fadeUp 0.3s ease-out 0.22s both;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+  .catch-stats-row {
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px;
+    animation: fadeUp 0.3s ease-out 0.3s both;
+  }
+  .catch-stat {
+    background: rgba(14,36,22,0.8); border:1px solid rgba(56,217,192,0.18);
+    border-radius:14px; padding:11px 6px; text-align:center; position:relative; overflow:hidden;
+  }
+  .catch-stat::after {
+    content:''; position:absolute; top:0; left:10%; right:10%; height:1px;
+    background: linear-gradient(90deg, transparent, rgba(56,217,192,0.4), transparent);
+  }
+  .catch-stat-val {
+    font-family:'Black Han Sans',sans-serif; font-size:1.2rem; line-height:1;
+    color:var(--gold); text-shadow: 0 0 12px rgba(240,192,64,0.3);
+  }
+  .catch-stat-lbl { font-size:0.55rem; font-weight:900; text-transform:uppercase; letter-spacing:1.5px; color:rgba(56,217,192,0.55); margin-top:4px; }
+
+  .catch-pb-row {
+    text-align:center; margin-bottom:14px; font-size:0.72rem; color:var(--muted); min-height:18px;
+    animation: fadeUp 0.3s ease-out 0.36s both;
+  }
+  .catch-pb-row span { color:var(--gold); font-weight:900; }
+
+  .catch-divider {
+    height:1px; margin-bottom:14px;
+    background: linear-gradient(90deg, transparent, rgba(56,217,192,0.2), transparent);
+  }
+
+  .catch-btns {
+    display:grid; grid-template-columns:1fr 1fr; gap:10px;
+    animation: fadeUp 0.3s ease-out 0.42s both;
+  }
+  .catch-btn {
+    height:54px; border:none; border-radius:15px; font-family:'Nunito',sans-serif; font-weight:900;
+    font-size:0.95rem; cursor:pointer; position:relative; overflow:hidden;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    transition:transform 0.12s, filter 0.12s;
+  }
+  .catch-btn:hover { filter:brightness(1.15); transform:translateY(-2px); }
+  .catch-btn:active { transform:translateY(1px) scale(0.97); }
+  .catch-btn::before {
+    content:''; position:absolute; top:0; left:-100%; width:60%; height:100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+    transform: skewX(-20deg); transition: left 0.5s;
+  }
+  .catch-btn:hover::before { left:160%; }
+  .catch-btn-keep { background:linear-gradient(160deg,#50ca30,#2a8018); color:#051505; box-shadow:0 4px 0 #165010, 0 6px 24px rgba(78,200,46,0.3); }
+  .catch-btn-sell { background:linear-gradient(160deg,#f5ca44,#bf7a0a); color:#1a0800; box-shadow:0 4px 0 #7a4a00, 0 6px 24px rgba(245,200,66,0.28); }
+  .catch-btn-sell .sell-price { font-size:0.8rem; opacity:0.85; }
 
   /* ── AQUARIUM / START SCREEN ── */
   #aquarium-screen { display:none; position:fixed; inset:0; background:#060e1a; z-index:150; overflow:hidden; }
@@ -251,19 +405,7 @@
   #state-indicator { position:fixed; bottom:12px; left:50%; transform:translateX(-50%); background:rgba(14,26,15,0.9); border:2px solid var(--rim); border-radius:20px; padding:6px 16px; font-size:0.7rem; font-weight:900; letter-spacing:2px; text-transform:uppercase; color:var(--muted); z-index:96; pointer-events:none; transition:opacity 0.3s; opacity:0; }
   #state-indicator.show { opacity:1; }
 
-  /* ── JOURNAL PANEL ── */
-  #journal-panel { display:none; position:fixed; top:var(--hdr); bottom:var(--ftr); right:0; width:min(360px,95vw);
-    background:var(--panel); border-left:3px solid #3a6a5a; z-index:98; overflow-y:auto;
-    animation:slideIn 0.22s cubic-bezier(0.34,1.2,0.64,1); }
-  #journal-panel.show { display:block; }
-  #journal-panel::-webkit-scrollbar { width:4px; }
-  #journal-panel::-webkit-scrollbar-track { background:var(--ink); }
-  #journal-panel::-webkit-scrollbar-thumb { background:#3a6a5a; border-radius:2px; }
-  .journal-header { position:sticky; top:0; background:var(--panel); border-bottom:2px solid #3a6a5a; padding:14px 16px 12px; display:flex; align-items:center; justify-content:space-between; z-index:1; }
-  .journal-title { font-family:'Black Han Sans',sans-serif; font-size:1.1rem; letter-spacing:2px;
-    background:linear-gradient(135deg,#7ae8c8,#38d9c0); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-  .journal-close { width:30px; height:30px; background:var(--ink); border:2px solid var(--rim); border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1rem; color:var(--muted); transition:all 0.15s; }
-  .journal-close:hover { border-color:var(--red); color:var(--red); }
+  /* ── GEAR (ROD/REEL) DISPLAY IN HEADER ── */
   .journal-stats-bar { margin:12px 12px 4px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
   .journal-stat-tile { background:var(--ink); border:2px solid var(--rim); border-radius:12px; padding:10px 8px; text-align:center; }
   .journal-stat-tile .jst-val { font-family:'Black Han Sans',sans-serif; font-size:1.3rem; color:var(--gold); }
@@ -314,8 +456,7 @@
   </div>
   <div class="hdr-right">
     <div class="ic-btn" id="btn-aquarium" title="Aquarium" onclick="showAquarium()">🏠</div>
-    <div class="ic-btn" id="btn-encyc" title="Fish Encyclopaedia" onclick="toggleEncyc()">📖</div>
-    <div class="ic-btn" id="btn-journal" title="Fishing Journal" onclick="toggleJournal()">📓</div>
+    <div class="ic-btn" id="btn-panel" title="Shop / Fish Guide / Catch Log" onclick="toggleSidePanel('shop')">📖</div>
     <div class="ic-btn" id="btn-debug" title="Debug" onclick="toggleDebug()">🐛</div>
     <div class="ic-btn" onclick="adjustZoom(0.15)" title="Zoom In">＋</div>
     <div class="ic-btn" onclick="adjustZoom(-0.15)" title="Zoom Out">－</div>
@@ -328,11 +469,19 @@
 
 <!-- BAIT BOX POPUP -->
 <div id="bait-box">
-  <div class="bb-title">🎒 BAIT BOX</div>
-  <div class="bb-grid" id="bait-box-grid"></div>
-  <div class="bb-sep"></div>
-  <div class="bb-depth-lbl">DEPTH</div>
-  <div class="bb-depth-row" id="depth-btns"></div>
+  <div class="bb-step-indicator">
+    <div class="bb-step active" id="bb-step1">1 · BAIT</div>
+    <div class="bb-step" id="bb-step2">2 · DEPTH</div>
+  </div>
+  <div id="bb-bait-section">
+    <div class="bb-title">🎒 CHOOSE BAIT</div>
+    <div class="bb-grid" id="bait-box-grid"></div>
+  </div>
+  <div id="bb-depth-section" style="display:none">
+    <div class="bb-title">🌊 CHOOSE DEPTH</div>
+    <div class="bb-depth-row" id="depth-btns"></div>
+    <button class="bb-confirm-btn show" id="bb-confirm-btn" onclick="confirmBaitAndDepth()">✅ CONFIRM &amp; READY TO CAST</button>
+  </div>
 </div>
 
 <!-- DISTANCE HUD (shown during fight AND while fishing) -->
@@ -352,9 +501,6 @@
   <button class="side-fab fab-bait-box" id="fab-baitbox" onclick="toggleBaitBox()" style="display:none">
     <span class="fab-icon">🎒</span>BAITS
   </button>
-  <button class="side-fab fab-shop" id="fab-shop" onclick="toggleShop()" style="display:none">
-    <span class="fab-icon">🛒</span>SHOP
-  </button>
   <div class="fab-sep" id="fab-sep1" style="display:none"></div>
   <button class="side-fab fab-reel" id="fab-reel"
     onmousedown="fabReelDown(event)" onmouseup="fabReelUp(event)"
@@ -368,22 +514,22 @@
   </button>
 </div>
 
-<!-- ENCYCLOPAEDIA PANEL -->
-<div id="encyc-panel">
-  <div class="ep-header">
-    <div class="ep-title">📖 FISH GUIDE</div>
-    <div class="ep-close" onclick="toggleEncyc()">✕</div>
-  </div>
-  <div id="encyc-content"></div>
+<!-- TENSION BAR HUD -->
+<div id="tension-hud">
+  <div id="tension-label">⚡ LINE STRAIN</div>
+  <div id="tension-track"><div id="tension-fill"></div></div>
+  <div id="tension-warn"></div>
 </div>
-
-<!-- SHOP PANEL -->
-<div id="shop-panel">
-  <div class="shop-header">
-    <div class="shop-title">🛒 BAIT SHOP</div>
-    <div class="shop-close" onclick="toggleShop()">✕</div>
+<div id="side-panel">
+  <div class="sp-header">
+    <div class="sp-tabs">
+      <button class="sp-tab" id="tab-shop" onclick="switchTab('shop')">🛒 SHOP</button>
+      <button class="sp-tab" id="tab-encyc" onclick="switchTab('encyc')">📖 GUIDE</button>
+      <button class="sp-tab" id="tab-journal" onclick="switchTab('journal')">📓 LOG</button>
+    </div>
+    <div class="sp-close" onclick="closeSidePanel()">✕</div>
   </div>
-  <div id="shop-content"></div>
+  <div id="sp-content"></div>
 </div>
 
 <!-- AQUARIUM / START SCREEN -->
@@ -408,26 +554,29 @@
   </div>
 </div>
 
-<!-- CATCH MODAL -->
+<!-- CATCH CARD MODAL -->
 <div id="modal">
-  <div class="modal-box">
-    <div class="modal-fish-emoji" id="modal-emoji">🐟</div>
-    <div class="modal-fish-name" id="modal-name">Fish</div>
-    <div class="modal-stats" id="modal-stats"></div>
-    <div class="modal-btns">
-      <button class="gbtn gbtn-lime" onclick="keepFish()">🏠 KEEP</button>
-      <button class="gbtn gbtn-gold" onclick="releaseFish()">🪙 SELL <span id="release-value">$0</span></button>
+  <div class="catch-card">
+    <div class="catch-card-art">
+      <div class="catch-card-water"></div>
+      <canvas id="catch-fish-canvas" width="280" height="140"></canvas>
+      <div class="catch-pb-badge" id="catch-pb-badge" style="display:none"></div>
+    </div>
+    <div class="catch-card-body">
+      <div class="catch-fish-name" id="modal-name"></div>
+      <div class="catch-fish-latin" id="modal-latin"></div>
+      <div class="catch-stats-row">
+        <div class="catch-stat"><div class="catch-stat-val" id="catch-weight">—</div><div class="catch-stat-lbl">Weight</div></div>
+        <div class="catch-stat"><div class="catch-stat-val" id="catch-size">—</div><div class="catch-stat-lbl">Length</div></div>
+        <div class="catch-stat"><div class="catch-stat-val" id="catch-value">—</div><div class="catch-stat-lbl">Value</div></div>
+      </div>
+      <div class="catch-pb-row" id="catch-pb-row"></div>
+      <div class="catch-btns">
+        <button class="catch-btn catch-btn-keep" onclick="keepFish()">🏠 KEEP</button>
+        <button class="catch-btn catch-btn-sell" onclick="releaseFish()">🪙 SELL <span class="sell-price" id="release-value"></span></button>
+      </div>
     </div>
   </div>
-</div>
-
-<!-- JOURNAL PANEL -->
-<div id="journal-panel">
-  <div class="journal-header">
-    <div class="journal-title">📓 FISHING JOURNAL</div>
-    <div class="journal-close" onclick="toggleJournal()">✕</div>
-  </div>
-  <div id="journal-content"></div>
 </div>
 
 <!-- STATE INDICATOR -->
@@ -483,6 +632,7 @@ let castLine = null;
 let tension = 0;
 let isReelIn = false;
 let groundBaitStock = 5;
+let reelVelocity = 0; // eased reel speed
 
 // Rod/Reel gear
 const rodTiers = [
@@ -523,9 +673,10 @@ function getDayTime() {
   return ((Date.now() - dayStartMs) % cycleDur) / cycleDur;
 }
 function getGameTimeStr() {
-  // Map 0–1 day cycle to 04:00–04:00 (24h)
+  // Map 0–1 day cycle with offset so dusk (t=0.42) ≈ 04:30
+  // Offset = 18h25m = 1105 mins
   const t = getDayTime();
-  const totalMins = Math.round(t * 1440); // 1440 mins in a day
+  const totalMins = (Math.round(t * 1440) + 1105) % 1440;
   const h = Math.floor(totalMins / 60) % 24;
   const m = totalMins % 60;
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
@@ -549,8 +700,6 @@ function smoothstep(t) { return t*t*(3-2*t); }
 function getSkyOverlay() {
   const phase = getDayPhase(), t = getDayTime();
   if (phase==='night') return {r:0,g:10,b:40,a:0.60};
-  if (phase==='dawn') { const p=(t-0.08)/0.14; const w=Math.sin(p*Math.PI); return {r:200*w,g:80*w,b:20*w,a:0.55*(1-p)+0.12*w}; }
-  if (phase==='dusk') { const p=(t-0.42)/0.16; const w=Math.sin(p*Math.PI); return {r:220*w,g:75*w,b:10*w,a:0.12*w+0.55*p}; }
   return {r:0,g:0,b:0,a:0};
 }
 
@@ -776,6 +925,7 @@ reedPatches.forEach(p=>{
 });
 
 let ripples=[];
+let carpBubbles=[]; // {x,y,r,alpha,vy}
 function addRipple(x,y){ripples.push({x,y,r:5,maxR:60,alpha:0.7});}
 
 // ═══════════════════════════════════════════════════
@@ -831,47 +981,111 @@ function saveData() {
   document.getElementById('money-amount').textContent=playerMoney;
 }
 
-// ── SHOP ──
-let shopOpen = false;
-function toggleShop() {
+// ── UNIFIED SIDE PANEL ──
+let sidePanelOpen = false;
+let activeTab = 'shop';
+
+function toggleSidePanel(tab) {
   playUIClick();
-  shopOpen = !shopOpen;
-  document.getElementById('shop-panel').classList.toggle('show', shopOpen);
-  if (shopOpen) buildShop();
+  if (sidePanelOpen && activeTab === tab) {
+    closeSidePanel();
+  } else {
+    sidePanelOpen = true;
+    switchTab(tab);
+    document.getElementById('side-panel').classList.add('show');
+  }
+  document.getElementById('btn-panel').classList.toggle('on', sidePanelOpen);
 }
-function buildShop() {
-  const el = document.getElementById('shop-content');
+
+function closeSidePanel() {
+  sidePanelOpen = false;
+  document.getElementById('side-panel').classList.remove('show');
+  document.getElementById('btn-panel').classList.remove('on');
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  ['shop','encyc','journal'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t === tab);
+  });
+  const el = document.getElementById('sp-content');
   el.innerHTML = '';
+  if (tab === 'shop') buildShop(el);
+  else if (tab === 'encyc') buildEncyc(el);
+  else if (tab === 'journal') buildJournal(el);
+  sidePanelOpen = true;
+}
+
+// Legacy shims so existing call-sites still work
+function toggleShop() { toggleSidePanel('shop'); }
+function toggleEncyc() { toggleSidePanel('encyc'); }
+function toggleJournal() { toggleSidePanel('journal'); }
+let shopFilter = 'all';
+function buildShop(el) {
+  if (!el) el = document.getElementById('sp-content');
+  el.innerHTML = '';
+
+  // Balance
   const bal = document.createElement('div');
   bal.className = 'shop-balance';
   bal.innerHTML = `<span class="shop-balance-lbl">Your Balance</span><span class="shop-balance-val">🪙 $${playerMoney}</span>`;
   el.appendChild(bal);
 
-  // Gear sections
-  const gearSections = [
-    { title:'🎣 Rods', tiers: rodTiers, type:'rod' },
-    { title:'⚙️ Reels', tiers: reelTiers, type:'reel' },
+  // Filter tabs
+  const filters = [
+    { id:'all',    icon:'🏪', label:'All' },
+    { id:'bait',   icon:'🎣', label:'Bait' },
+    { id:'bundle', icon:'🎁', label:'Bundles' },
+    { id:'rod',    icon:'🪄', label:'Rods' },
+    { id:'reel',   icon:'⚙️', label:'Reels' },
   ];
-  gearSections.forEach(gs=>{
-    const lbl=document.createElement('div');lbl.className='shop-section-lbl';lbl.textContent=gs.title;el.appendChild(lbl);
-    gs.tiers.forEach(tier=>{
-      const isEquipped = (gs.type==='rod'?equippedRod:equippedReel)===tier.id;
-      const row=document.createElement('div');
-      row.className='shop-gear-item'+(tier.owned?' owned':'');
-      const stats = gs.type==='rod'
-        ? `<span class="shop-gear-stat">Cast ×${tier.castMult.toFixed(2)}</span>`
-        : `<span class="shop-gear-stat">Line ${tier.tensionMax}%</span><span class="shop-gear-stat">Reel ×${tier.reelMult.toFixed(1)}</span>`;
-      let actionBtn = '';
-      if(tier.owned && isEquipped) actionBtn=`<span class="shop-gear-owned-badge">✓ EQUIPPED</span>`;
-      else if(tier.owned) actionBtn=`<button class="shop-buy-btn" style="background:linear-gradient(160deg,#38d9c0,#1a6a60);box-shadow:0 3px 0 #0a3a30" onclick="equipGear('${gs.type}','${tier.id}')">EQUIP</button>`;
-      else actionBtn=`<button class="shop-buy-btn" ${playerMoney<tier.price?'disabled':''} onclick="buyGear('${gs.type}','${tier.id}')">🪙$${tier.price}</button>`;
-      row.innerHTML=`<div class="shop-gear-tier"><div class="shop-gear-icon">${tier.icon}</div><div class="shop-gear-meta"><div class="shop-gear-name">${tier.name}</div><div class="shop-gear-desc">${tier.desc}</div><div class="shop-gear-stats">${stats}</div></div>${actionBtn}</div>`;
-      el.appendChild(row);
-    });
-    const div=document.createElement('div');div.className='shop-divider';el.appendChild(div);
+  const filterRow = document.createElement('div');
+  filterRow.className = 'shop-filters';
+  filters.forEach(f => {
+    const btn = document.createElement('button');
+    btn.className = 'shop-filter-btn' + (shopFilter===f.id?' active':'');
+    btn.innerHTML = `${f.icon} ${f.label}`;
+    btn.onclick = () => { shopFilter = f.id; buildShop(document.getElementById('sp-content')); };
+    filterRow.appendChild(btn);
   });
+  el.appendChild(filterRow);
 
+  const showGear = shopFilter==='all'||shopFilter==='rod'||shopFilter==='reel';
+  const showBait = shopFilter==='all'||shopFilter==='bait';
+  const showBundle = shopFilter==='all'||shopFilter==='bundle';
+
+  // Gear sections
+  if (showGear) {
+    const gearSections = [
+      { title:'🪄 Rods', tiers: rodTiers, type:'rod', show: shopFilter==='all'||shopFilter==='rod' },
+      { title:'⚙️ Reels', tiers: reelTiers, type:'reel', show: shopFilter==='all'||shopFilter==='reel' },
+    ];
+    gearSections.filter(gs=>gs.show).forEach(gs=>{
+      const lbl=document.createElement('div');lbl.className='shop-section-lbl';lbl.textContent=gs.title;el.appendChild(lbl);
+      gs.tiers.forEach(tier=>{
+        const isEquipped = (gs.type==='rod'?equippedRod:equippedReel)===tier.id;
+        const row=document.createElement('div');
+        row.className='shop-gear-item'+(tier.owned?' owned':'');
+        const stats = gs.type==='rod'
+          ? `<span class="shop-gear-stat">Cast ×${tier.castMult.toFixed(2)}</span>`
+          : `<span class="shop-gear-stat">Line ${tier.tensionMax}%</span><span class="shop-gear-stat">Reel ×${tier.reelMult.toFixed(1)}</span>`;
+        let actionBtn = '';
+        if(tier.owned && isEquipped) actionBtn=`<span class="shop-gear-owned-badge">✓ EQUIPPED</span>`;
+        else if(tier.owned) actionBtn=`<button class="shop-buy-btn" style="background:linear-gradient(160deg,#38d9c0,#1a6a60);box-shadow:0 3px 0 #0a3a30" onclick="equipGear('${gs.type}','${tier.id}')">EQUIP</button>`;
+        else actionBtn=`<button class="shop-buy-btn" ${playerMoney<tier.price?'disabled':''} onclick="buyGear('${gs.type}','${tier.id}')">🪙$${tier.price}</button>`;
+        row.innerHTML=`<div class="shop-gear-tier"><div class="shop-gear-icon">${tier.icon}</div><div class="shop-gear-meta"><div class="shop-gear-name">${tier.name}</div><div class="shop-gear-desc">${tier.desc}</div><div class="shop-gear-stats">${stats}</div></div>${actionBtn}</div>`;
+        el.appendChild(row);
+      });
+      const div=document.createElement('div');div.className='shop-divider';el.appendChild(div);
+    });
+  }
+
+  // Bait & bundle items
   shopItems.forEach(section => {
+    const isBundleSection = section.section.includes('Bundle');
+    if (isBundleSection && !showBundle) return;
+    if (!isBundleSection && !showBait) return;
+
     const lbl = document.createElement('div');
     lbl.className = 'shop-section-lbl';
     lbl.textContent = section.section;
@@ -884,7 +1098,6 @@ function buildShop() {
       const icon = bait ? bait.icon : (item.bundleId==='starter'?'🎁':'🛍️');
       const desc = bait ? bait.desc : item.desc;
       const currentQty = item.baitId ? (baitInventory[item.baitId]||0) : null;
-
       row.innerHTML = `
         <div class="shop-item-icon">${icon}</div>
         <div class="shop-item-info">
@@ -914,7 +1127,7 @@ function buyGear(type, id) {
   tier.owned = true;
   equippedRod  = type==='rod'  ? id : equippedRod;
   equippedReel = type==='reel' ? id : equippedReel;
-  saveData(); buildShop();
+  saveData(); buildShop(); if(sidePanelOpen&&activeTab==='shop') buildShop(document.getElementById('sp-content'));
   showToast(`✅ Bought & equipped ${tier.name}!`);
 }
 
@@ -922,7 +1135,7 @@ function equipGear(type, id) {
   playUIClick();
   if(type==='rod')  equippedRod=id;
   else              equippedReel=id;
-  saveData(); buildShop();
+  saveData(); if(sidePanelOpen&&activeTab==='shop') buildShop(document.getElementById('sp-content'));
   const tier=(type==='rod'?rodTiers:reelTiers).find(t=>t.id===id);
   showToast(`🎣 ${tier.name} equipped!`);
 }
@@ -941,43 +1154,73 @@ function buyItem(item) {
     showToast(`✅ Bought ${item.label}!`);
   }
   saveData();
-  buildShop();
+  if(sidePanelOpen&&activeTab==='shop') buildShop(document.getElementById('sp-content'));
   buildBaitBox();
 }
 
 // ── BAIT BOX ──
 let baitBoxOpen = false;
+let baitBoxStep = 1; // 1=choose bait, 2=choose depth
+
 function toggleBaitBox() {
   playUIClick();
   baitBoxOpen = !baitBoxOpen;
   const bb = document.getElementById('bait-box');
   bb.classList.toggle('open', baitBoxOpen);
-  if (baitBoxOpen) buildBaitBox();
+  if (baitBoxOpen) { baitBoxStep = 1; buildBaitBox(); }
 }
+
 function buildBaitBox() {
-  const grid = document.getElementById('bait-box-grid');
-  grid.innerHTML = '';
-  baits.forEach(b => {
-    const qty = baitInventory[b.id]||0;
-    const btn = document.createElement('button');
-    const isLocked = qty === 0;
-    btn.className = 'bb-bait' + (selectedBait?.id===b.id?' sel':'') + (isLocked?' locked':'');
-    btn.innerHTML = `<span class="bb-bait-icon">${b.icon}</span><span class="bb-bait-name">${b.name}</span><span class="bb-bait-qty">${isLocked?'🚫 BUY':'×'+qty}</span>`;
-    btn.onclick = () => {
-      if(isLocked){showToast(`Buy ${b.name} in the shop first!`);return;}
-      selectedBait=b; buildBaitBox(); updateStateIndicator();
-    };
-    grid.appendChild(btn);
-  });
-  const depthRow = document.getElementById('depth-btns');
-  depthRow.innerHTML = '';
-  depthOptions.forEach(d => {
-    const btn = document.createElement('button');
-    btn.className='bb-depth-btn'+(floatDepth===d.val?' sel':'');
-    btn.innerHTML=`<span class="dbi">${d.icon}</span>${d.label}`;
-    btn.onclick=()=>{floatDepth=d.val;buildBaitBox();};
-    depthRow.appendChild(btn);
-  });
+  const step1 = document.getElementById('bb-step1');
+  const step2 = document.getElementById('bb-step2');
+  const baitSec = document.getElementById('bb-bait-section');
+  const depthSec = document.getElementById('bb-depth-section');
+
+  if (baitBoxStep === 1) {
+    step1.className = 'bb-step active';
+    step2.className = 'bb-step';
+    baitSec.style.display = 'block';
+    depthSec.style.display = 'none';
+    const grid = document.getElementById('bait-box-grid');
+    grid.innerHTML = '';
+    baits.forEach(b => {
+      const qty = baitInventory[b.id]||0;
+      const btn = document.createElement('button');
+      const isLocked = qty === 0;
+      btn.className = 'bb-bait' + (selectedBait?.id===b.id?' sel':'') + (isLocked?' locked':'');
+      btn.innerHTML = `<span class="bb-bait-icon">${b.icon}</span><span class="bb-bait-name">${b.name}</span><span class="bb-bait-qty">${isLocked?'🚫 BUY':'×'+qty}</span>`;
+      btn.onclick = () => {
+        if(isLocked){showToast(`Buy ${b.name} in the shop first!`);return;}
+        selectedBait = b;
+        baitBoxStep = 2;
+        buildBaitBox();
+      };
+      grid.appendChild(btn);
+    });
+  } else {
+    step1.className = 'bb-step done';
+    step2.className = 'bb-step active';
+    baitSec.style.display = 'none';
+    depthSec.style.display = 'block';
+    const depthRow = document.getElementById('depth-btns');
+    depthRow.innerHTML = '';
+    depthOptions.forEach(d => {
+      const btn = document.createElement('button');
+      btn.className = 'bb-depth-btn' + (floatDepth===d.val?' sel':'');
+      btn.innerHTML = `<span class="dbi">${d.icon}</span>${d.label}`;
+      btn.onclick = () => { floatDepth = d.val; buildBaitBox(); };
+      depthRow.appendChild(btn);
+    });
+  }
+  updateStateIndicator();
+}
+
+function confirmBaitAndDepth() {
+  playUIClick();
+  baitBoxOpen = false;
+  document.getElementById('bait-box').classList.remove('open');
+  updateStateIndicator();
+  showToast(`${selectedBait.icon} ${selectedBait.name} · ${depthOptions.find(d=>d.val===floatDepth).label} — tap water to cast!`);
 }
 document.addEventListener('click', e => {
   if(baitBoxOpen && !e.target.closest('#bait-box') && !e.target.closest('#fab-baitbox')) {
@@ -1265,13 +1508,29 @@ function handleWorldClick(clientX,clientY) {
   ensureAudio();
   const w=canvasToWorld(clientX,clientY);
   if(gameState==='fish-hooked')return;
-  if(gameState==='peg-selection'){
+
+  // Peg selection — always allow switching peg if no bait chosen yet
+  if(gameState==='peg-selection'||(gameState==='bait-menu'&&!selectedBait)){
+    let hitPeg=false;
     pegs.forEach(peg=>{
       const d=Math.hypot(w.x-peg.x,w.y-peg.y);
-      if(d<30){selectedPeg=peg.id;gameState='bait-menu';updateSideBtns();updateStateIndicator();showToast(`Peg ${peg.id} selected! Pick bait & cast.`);}
+      if(d<30){selectedPeg=peg.id;gameState='bait-menu';hitPeg=true;updateSideBtns();updateStateIndicator();showToast(`Peg ${peg.id} — pick your bait then tap to cast!`);}
     });
     return;
   }
+
+  // Bait chosen + peg selected: tap anywhere starts casting
+  if(gameState==='bait-menu'&&selectedBait){
+    // Allow peg switching with a direct peg tap even now
+    let hitPeg=false;
+    pegs.forEach(peg=>{
+      const d=Math.hypot(w.x-peg.x,w.y-peg.y);
+      if(d<30){selectedPeg=peg.id;hitPeg=true;updateSideBtns();updateStateIndicator();showToast(`Switched to Peg ${peg.id}! Tap again to cast.`);}
+    });
+    if(!hitPeg){ handleCast(); }
+    return;
+  }
+
   if(gameState==='aiming'){gameState='power';powerLevel=0;powerDir=1;updateSideBtns();updateStateIndicator();return;}
   if(gameState==='power'){execCast();return;}
 }
@@ -1327,7 +1586,6 @@ function updateSideBtns() {
   const fabCastIcon=document.getElementById('fab-cast-icon');
   const fabCastLbl=document.getElementById('fab-cast-label');
   const fabBaitBox=document.getElementById('fab-baitbox');
-  const fabShop=document.getElementById('fab-shop');
   const fabReel=document.getElementById('fab-reel');
   const fabGb=document.getElementById('fab-gb');
   const fabSep=document.getElementById('fab-sep1');
@@ -1357,7 +1615,6 @@ function updateSideBtns() {
   }
 
   fabBaitBox.style.display = (gameState==='bait-menu') ? 'flex' : 'none';
-  fabShop.style.display = (gameState==='bait-menu') ? 'flex' : 'none';
   fabSep.style.display = inFishing ? 'block' : 'none';
   fabReel.style.display = (inFishing||inFight) ? 'flex' : 'none';
   fabGb.style.display = inFishing ? 'flex' : 'none';
@@ -1378,6 +1635,9 @@ function updateSideBtns() {
     fabReel.classList.remove('danger','reeling');
     fabIcon.textContent='🔄'; fabLbl.textContent='REEL IN';
   }
+
+  // Update DOM tension bar
+  updateTensionHUD();
 }
 
 function handleFabCast() {
@@ -1410,18 +1670,29 @@ function execCast() {
 function fabReelDown(e) { e.preventDefault(); ensureAudio(); isReeling=true; updateSideBtns(); }
 function fabReelUp(e) { e.preventDefault(); isReeling=false; updateSideBtns(); }
 
-// ── Journal ──
-let journalOpen=false;
-function toggleJournal() {
-  playUIClick();
-  journalOpen=!journalOpen;
-  document.getElementById('journal-panel').classList.toggle('show',journalOpen);
-  document.getElementById('btn-journal').classList.toggle('on',journalOpen);
-  if(journalOpen) buildJournal();
+function updateTensionHUD() {
+  const hud = document.getElementById('tension-hud');
+  const fill = document.getElementById('tension-fill');
+  const warn = document.getElementById('tension-warn');
+  const label = document.getElementById('tension-label');
+  const inFight = gameState === 'fish-hooked';
+  hud.classList.toggle('show', inFight);
+  if (!inFight) return;
+  const reel = getActiveReel();
+  const pct = Math.min(100, Math.round((tension / reel.tensionMax) * 100));
+  fill.style.width = pct + '%';
+  fill.setAttribute('data-pct', pct + '%');
+  const danger = pct > 75;
+  const warning = pct > 45;
+  hud.classList.toggle('danger', danger);
+  label.textContent = `⚡ LINE STRAIN  [${reel.name}]`;
+  label.style.color = danger ? '#ff6666' : warning ? '#f0a030' : 'rgba(255,255,255,0.6)';
+  warn.textContent = pct >= 90 ? '⚠ ABOUT TO SNAP — RELEASE REEL!' : (pct > 75 ? '⚠ HIGH TENSION — ease off!' : '');
 }
-function buildJournal() {
-  const el=document.getElementById('journal-content');
-  el.innerHTML='';
+
+// ── Journal & Encyc -- now handled by unified panel (shims above)
+function buildJournal(el) {
+  if (!el) el = document.getElementById('sp-content');
 
   // Summary stats bar
   const totalCaught=Object.values(speciesRecords).reduce((a,b)=>a+b.count,0);
@@ -1469,16 +1740,8 @@ function buildJournal() {
     const empty=document.createElement('div');empty.className='journal-empty';empty.innerHTML='<div style="font-size:2rem;margin-bottom:8px">🎣</div>No catches recorded yet.<br>Get out there and fish!';el.appendChild(empty);
   }
 }
-let encycOpen=false;
-function toggleEncyc() {
-  encycOpen=!encycOpen;
-  document.getElementById('encyc-panel').classList.toggle('show',encycOpen);
-  document.getElementById('btn-encyc').classList.toggle('on',encycOpen);
-  if(encycOpen) buildEncyc();
-}
-function buildEncyc() {
-  const el=document.getElementById('encyc-content');
-  el.innerHTML='';
+function buildEncyc(el) {
+  if (!el) el = document.getElementById('sp-content');
   fishTypes.forEach(ft=>{
     const depthOffset=Math.max(0,((ft.depthPref-1)/2)*70);
     const card=document.createElement('div');
@@ -1549,7 +1812,7 @@ function hookFish(f) {
   hookedFish=f; gameState='fish-hooked'; fishRunning=true;
   runTimer=3000+Math.random()*4000+f.size*80;
   tension=0; lineHealth=100; isReeling=false;
-  fishStamina=100;
+  fishStamina=100; reelVelocity=0;
   const peg=pegs.find(p=>p.id===selectedPeg);
   hookedFish.angle=Math.atan2(f.y-peg.y,f.x-peg.x)+(Math.random()-0.5)*0.5;
   updateSideBtns(); updateStateIndicator();
@@ -1558,11 +1821,14 @@ function hookFish(f) {
 
 function catchFish() {
   playLanding();
+  gameState = 'catch-modal'; // prevent re-entry and hide fight HUDs
+  document.getElementById('dist-hud').className='';
+  document.getElementById('tension-hud').classList.remove('show');
+  updateSideBtns();
   const weight=Math.round(hookedFish.baseWeight*(0.6+Math.random()*0.8));
   const size=Math.round(hookedFish.size*(0.8+Math.random()*0.4));
   const price=Math.round(hookedFish.basePrice*(weight/hookedFish.baseWeight));
-  caughtFish={type:hookedFish.type,weight,size,color:hookedFish.color,emoji:hookedFish.emoji,price};
-  // Record in journal
+  caughtFish={type:hookedFish.type,weight,size,color:hookedFish.color,emoji:hookedFish.emoji,price,latin:fishTypes.find(f=>f.type===hookedFish.type)?.latin||''};
   catchLog.push({type:caughtFish.type,weight,size,emoji:caughtFish.emoji,gameTimeStr:getGameTimeStr(),timestamp:Date.now()});
   if(!speciesRecords[caughtFish.type]){
     speciesRecords[caughtFish.type]={bestWeight:weight,bestSize:size,count:1};
@@ -1575,39 +1841,145 @@ function catchFish() {
   showCatchModal();
 }
 
+let _catchAnimId = null;
+
 function showCatchModal() {
-  const rec=speciesRecords[caughtFish.type];
-  const isPB=rec&&rec.count===1?'🏆 New species!':rec&&caughtFish.weight>=rec.bestWeight?'🏆 Personal Best!':'';
-  document.getElementById('modal-emoji').textContent=caughtFish.emoji;
-  document.getElementById('modal-name').textContent=caughtFish.type+(isPB?` <span style="color:var(--gold);font-size:0.8rem">${isPB}</span>`:'');
-  document.getElementById('modal-stats').innerHTML=`Weight: <b>${caughtFish.weight}g</b>&nbsp;&nbsp;Length: <b>${caughtFish.size}cm</b>${rec?`<br><span style="font-size:0.7rem;color:var(--muted)">PB: ${rec.bestWeight}g | Caught: ${rec.count}×</span>`:''}`;
-  document.getElementById('release-value').textContent='$'+caughtFish.price;
+  const rec = speciesRecords[caughtFish.type];
+  const isNewSpecies = rec && rec.count === 1;
+  const isPB = rec && !isNewSpecies && caughtFish.weight >= rec.bestWeight;
+
+  document.getElementById('modal-name').textContent = caughtFish.type.toUpperCase();
+  document.getElementById('modal-latin').textContent = caughtFish.latin || '';
+  document.getElementById('catch-weight').textContent = caughtFish.weight + 'g';
+  document.getElementById('catch-size').textContent = caughtFish.size + 'cm';
+  document.getElementById('catch-value').textContent = '$' + caughtFish.price;
+  document.getElementById('release-value').textContent = '$' + caughtFish.price;
+
+  const pbBadge = document.getElementById('catch-pb-badge');
+  if (isNewSpecies) { pbBadge.textContent = '🏆 NEW SPECIES!'; pbBadge.style.display = 'block'; }
+  else if (isPB)    { pbBadge.textContent = '🏆 PERSONAL BEST!'; pbBadge.style.display = 'block'; }
+  else              { pbBadge.style.display = 'none'; }
+
+  const pbRow = document.getElementById('catch-pb-row');
+  pbRow.innerHTML = (rec && rec.count > 1)
+    ? `PB: <span>${rec.bestWeight}g</span> &nbsp;·&nbsp; Caught: <span>${rec.count}×</span>` : '';
+
   document.getElementById('modal').classList.add('show');
+
+  // Cancel any previous animation
+  if (_catchAnimId) { cancelAnimationFrame(_catchAnimId); _catchAnimId = null; }
+
+  const fishCanvas = document.getElementById('catch-fish-canvas');
+  const fctx = fishCanvas.getContext('2d');
+  const ft = fishTypes.find(f => f.type === caughtFish.type);
+  const fishSize = ft ? ft.size * 2.6 : 32;
+  const W = fishCanvas.width, H = fishCanvas.height;
+  let phase = 0;
+
+  // Launch sparkles for PB / new species
+  const sparks = [];
+  if (isNewSpecies || isPB) {
+    for (let i = 0; i < 26; i++) {
+      const a = Math.random() * Math.PI * 2, spd = 0.9 + Math.random() * 1.8;
+      sparks.push({ x:W/2, y:H*0.52, vx:Math.cos(a)*spd, vy:Math.sin(a)*spd - 1.0,
+        life:1, decay:0.016+Math.random()*0.014, r:1.5+Math.random()*2.5, grav:0.03,
+        color:['#f0c040','#6ddb4a','#38d9c0','#ffffff'][Math.floor(Math.random()*4)] });
+    }
+  }
+
+  function frame() {
+    phase += 0.04;
+    fctx.clearRect(0, 0, W, H);
+
+    // Underwater gradient
+    const wg = fctx.createLinearGradient(0, H*0.4, 0, H);
+    wg.addColorStop(0, 'rgba(8,30,54,0)'); wg.addColorStop(1, 'rgba(6,20,42,0.7)');
+    fctx.fillStyle = wg; fctx.fillRect(0, H*0.4, W, H*0.6);
+
+    // Drifting light
+    const lx = W*0.5 + Math.sin(phase*0.55)*W*0.22;
+    const lg = fctx.createRadialGradient(lx, H*0.12, 0, lx, H*0.12, W*0.5);
+    lg.addColorStop(0, 'rgba(56,217,192,0.07)'); lg.addColorStop(1, 'transparent');
+    fctx.fillStyle = lg; fctx.fillRect(0, 0, W, H);
+
+    // Rising bubbles
+    for (let i = 0; i < 5; i++) {
+      const bx = (W*0.12 + i*W*0.19 + Math.sin(phase*0.9+i*1.7)*10) % (W*0.9) + W*0.05;
+      const by = H - ((phase*15 + i*H*0.19) % H);
+      fctx.save(); fctx.globalAlpha = 0.12 + Math.sin(phase+i)*0.06;
+      fctx.strokeStyle = 'rgba(130,210,255,0.9)'; fctx.lineWidth = 0.8;
+      fctx.beginPath(); fctx.arc(bx, by, 1.6+i*0.4, 0, Math.PI*2); fctx.stroke();
+      fctx.restore();
+    }
+
+    const bobY = Math.sin(phase*1.2)*5;
+
+    // PB glow ring
+    if (isNewSpecies || isPB) {
+      fctx.save(); fctx.globalAlpha = 0.18 + Math.sin(phase*2)*0.09;
+      fctx.strokeStyle = '#f0c040'; fctx.lineWidth = 2.5;
+      fctx.beginPath(); fctx.arc(W/2, H*0.52+bobY, fishSize*1.4+Math.sin(phase*2)*4, 0, Math.PI*2); fctx.stroke();
+      fctx.restore();
+    }
+
+    // Shadow
+    fctx.save(); fctx.globalAlpha = 0.14;
+    fctx.fillStyle = '#000';
+    fctx.beginPath(); fctx.ellipse(W/2, H*0.55+fishSize*0.5, fishSize*0.95, fishSize*0.15, 0, 0, Math.PI*2); fctx.fill();
+    fctx.restore();
+
+    // Fish
+    fctx.save();
+    fctx.translate(W/2, H*0.52 + bobY);
+    fctx.rotate(Math.sin(phase*0.8)*0.05);
+    drawFishShape(fctx, { type:caughtFish.type, size:fishSize, tailPhase:phase*2.3, color:ft?ft.color:'#4488aa' });
+    fctx.restore();
+
+    // Sparkles
+    sparks.forEach(sp => {
+      if (sp.life <= 0) return;
+      sp.x += sp.vx; sp.y += sp.vy; sp.vy += sp.grav; sp.life -= sp.decay;
+      fctx.save(); fctx.globalAlpha = Math.max(0, sp.life);
+      fctx.fillStyle = sp.color;
+      fctx.beginPath(); fctx.arc(sp.x, sp.y, sp.r, 0, Math.PI*2); fctx.fill();
+      fctx.restore();
+    });
+
+    _catchAnimId = requestAnimationFrame(frame);
+  }
+  frame();
 }
 
 function keepFish() {
-  if(aquariumFish.length<12){aquariumFish.push(caughtFish);saveData();}
-  else showToast('Aquarium full! Sell this one.');
+  if (_catchAnimId) { cancelAnimationFrame(_catchAnimId); _catchAnimId = null; }
   document.getElementById('modal').classList.remove('show');
+  if(aquariumFish.length<12){aquariumFish.push(caughtFish);saveData();showToast(`🏠 ${caughtFish.type} added to your aquarium!`);}
+  else showToast('Aquarium full! Sell this one.');
   resetFishing();
 }
 
 function releaseFish() {
-  playerMoney+=caughtFish.price; saveData();
+  if (_catchAnimId) { cancelAnimationFrame(_catchAnimId); _catchAnimId = null; }
   document.getElementById('modal').classList.remove('show');
+  playerMoney+=caughtFish.price; saveData();
+  showToast(`🪙 Sold ${caughtFish.type} for $${caughtFish.price}!`);
   resetFishing();
 }
 
 function fishEscaped() {
   playLineSnap();
   showToast('💔 LINE SNAPPED! Fish got away!',3500);
-  tension=0; resetFishing();
+  tension=0; reelVelocity=0;
+  document.getElementById('tension-hud').classList.remove('show');
+  resetFishing();
 }
 
 function resetFishing() {
   hookedFish=null; floatPos=null; castLine=null; isReeling=false; isReelIn=false;
-  lineHealth=100; tension=0; castSinking=false; gameState='bait-menu';
+  lineHealth=100; tension=0; castSinking=false; reelVelocity=0; gameState='bait-menu';
   document.getElementById('dist-hud').className='';
+  document.getElementById('tension-hud').classList.remove('show');
+  document.getElementById('modal').classList.remove('show');
   updateSideBtns(); updateStateIndicator();
 }
 
@@ -1627,10 +1999,13 @@ function update() {
   bobPhase += 0.05 * s;
   ripples.forEach(r=>{ r.r += 0.8*s; r.alpha -= 0.015*s; });
   ripples = ripples.filter(r=>r.alpha>0);
+  carpBubbles.forEach(b=>{ b.wobble+=b.wobbleSpd*s; b.x+=Math.sin(b.wobble)*0.4; b.y-=b.vy*s; b.alpha-=0.004*s; });
+  carpBubbles = carpBubbles.filter(b=>b.alpha>0);
   groundBait.forEach(gb=>{ if(!gb.settled){ gb.sinkT=Math.min(1,gb.sinkT+0.008*s); if(gb.sinkT>=1) gb.settled=true; } });
   reeds.forEach(r=>{ r.sway += r.swaySpeed*s; });
 
   if(gameState==='aquarium') return;
+  if(gameState==='catch-modal') return; // freeze world while showing catch card
 
   if(floatPos&&(gameState==='fishing'||gameState==='fish-hooked')){
     const vp=document.getElementById('viewport'),vpW=vp.clientWidth,vpH=vp.clientHeight;
@@ -1644,7 +2019,7 @@ function update() {
   if(gameState==='fish-hooked'&&hookedFish&&selectedPeg){
     const peg=pegs.find(p=>p.id===selectedPeg);
     const dist=Math.hypot(hookedFish.x-peg.x,hookedFish.y-peg.y);
-    const distM=Math.round(dist/10);
+    const distM=Math.min(99,Math.round(dist/25)); // world units → realistic metres
     const maxDist=900;
     const pct=Math.max(0,Math.min(100,100-(dist/maxDist)*100));
     const barColor=pct>75?'#6ddb4a':pct>40?'#f0c040':'#f07830';
@@ -1747,6 +2122,14 @@ function updateFish(s) {
       f.roamTimer -= s;
       if(f.roamTimer<=0||!f.feeding){ pickRandomLakeTarget(f,0.3,0.85); f.roamTimer=220+Math.random()*280; }
       steerFishToTarget(f, s, speedMod);
+      // Occasional surface bubbles from carp
+      if(f.type==='Carp' && Math.random()<0.004*s && carpBubbles.length<80){
+        const nx = f.x + (Math.random()-0.5)*30;
+        const ny = f.y + (Math.random()-0.5)*20;
+        for(let i=0;i<2+Math.floor(Math.random()*3);i++){
+          carpBubbles.push({x:nx+(Math.random()-0.5)*18,y:ny,r:1.5+Math.random()*3.5,alpha:0.7+Math.random()*0.3,vy:0.3+Math.random()*0.5,wobble:Math.random()*Math.PI*2,wobbleSpd:0.04+Math.random()*0.04});
+        }
+      }
 
     } else if(f.behavior==='ambush'){
       f.ambushTimer -= s;
@@ -1779,8 +2162,7 @@ function updateFish(s) {
 }
 
 function updateHookedFish(s) {
-  if(gameState!=='fish-hooked'||!hookedFish) return;
-  const peg = pegs.find(p=>p.id===selectedPeg);
+  if(gameState!=='fish-hooked'||!hookedFish) return;  const peg = pegs.find(p=>p.id===selectedPeg);
   const reel = getActiveReel();
   const tensionMax = reel.tensionMax; // e.g. 100 / 130 / 175
   const reelMult = reel.reelMult;     // e.g. 1.0 / 1.4 / 1.9
@@ -1821,13 +2203,15 @@ function updateHookedFish(s) {
 
     if(isReeling){
       const dx=peg.x-hookedFish.x, dy=peg.y-hookedFish.y, d=Math.hypot(dx,dy);
-      if(d<50){ catchFish(); return; }
-      const reelSpeed = 2.5 * reelMult;
-      hookedFish.x += dx/d*reelSpeed*s;
-      hookedFish.y += dy/d*reelSpeed*s;
+      if(d<200){ catchFish(); return; }
+      const targetSpeed = 2.5 * reelMult;
+      reelVelocity += (targetSpeed - reelVelocity) * 0.06 * s; // ease in
+      hookedFish.x += dx/d*reelVelocity*s;
+      hookedFish.y += dy/d*reelVelocity*s;
       floatPos = {x:hookedFish.x, y:hookedFish.y};
       tension -= 0.5*s;
     } else {
+      reelVelocity += (0 - reelVelocity) * 0.12 * s; // ease out
       tension -= 1.2*s;
     }
 
@@ -1845,6 +2229,7 @@ function updateHookedFish(s) {
   tension = Math.max(0, Math.min(tensionMax, tension));
   if(normTension >= 100){ fishEscaped(); return; }
   updateSideBtns();
+  updateTensionHUD();
 }
 
 // ═══════════════════════════════════════════════════
@@ -1903,10 +2288,11 @@ function draw() {
     }
   }
 
-  drawLake(); drawLilyPads(); drawReeds(); drawGroundBait(); drawFish(); drawPegs(); drawFloat(); drawAimingArc(); drawRipples(); drawFightOverlay();
+  drawLake(); drawLilyPads(); drawReeds(); drawGroundBait(); drawFish(); drawCarpBubbles(); drawPegs(); drawFloat(); drawAimingArc(); drawRipples();
   const sky=getSkyOverlay();
   if(sky.a>0.01){ctx.save();ctx.globalAlpha=sky.a;ctx.fillStyle=`rgb(${Math.round(sky.r)},${Math.round(sky.g)},${Math.round(sky.b)})`;ctx.fillRect(0,0,WORLD_W,WORLD_H);ctx.restore();}
   if(nf>0.3)drawStars(nf);
+  drawFightOverlay();
   drawTimeHUD();
 }
 
@@ -1914,7 +2300,7 @@ function drawLake() {
   const nf=getNightFactor(),phase=getDayPhase();
   function lc(a,b,t){return a.map((v,i)=>Math.round(v*(1-t)+b[i]*t));}
   const deep=lc([26,74,110],[8,18,48],nf),mid=lc([33,94,138],[12,28,62],nf),shore=lc([58,130,190],[18,42,88],nf);
-  const ddw=(phase==='dawn'||phase==='dusk')?0.25:0,sw=[Math.round(shore[0]+80*ddw),Math.round(shore[1]+20*ddw),Math.round(shore[2]-20*ddw)];
+  const sw=shore;
   const grad=ctx.createRadialGradient(LAKE_CENTER.x,LAKE_CENTER.y,100,LAKE_CENTER.x,LAKE_CENTER.y,Math.max(LAKE_RX,LAKE_RY));
   grad.addColorStop(0,`rgb(${deep.join(',')})`); grad.addColorStop(0.5,`rgb(${mid.join(',')})`); grad.addColorStop(0.85,`rgb(${shore.join(',')})`); grad.addColorStop(1,`rgb(${sw.join(',')})`);
   buildLakePath(); ctx.fillStyle=grad; ctx.fill();
@@ -2308,25 +2694,46 @@ let starPhase=0;
 function drawStars(nf){starPhase+=0.02;ctx.save();STARS.forEach(s=>{ctx.globalAlpha=nf*(0.4+0.4*Math.sin(starPhase+s.twinkle));ctx.fillStyle='#ffffff';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();});ctx.restore();}
 
 function drawTimeHUD(){
-  const phase=getDayPhase(),vp=document.getElementById('viewport'),vpW=vp.clientWidth;
-  const wx=(vpW-180-viewX)/viewScale, wy=(58-viewY)/viewScale;
-  const icons={night:'🌙',dawn:'🌅',day:'☀️',dusk:'🌇'};
-  const colors={night:'#9999ff',dawn:'#ffaa66',day:'#ffe060',dusk:'#ff8844'};
+  const wx=(16-viewX)/viewScale, wy=(16-viewY)/viewScale;
   const timeStr=getGameTimeStr();
-  const col=colors[phase]||'#ffe060';
+  const phase=getDayPhase();
+  const icons={night:'🌙',dawn:'🌅',day:'☀️',dusk:'🌇'};
+  const phaseLabel=(icons[phase]||'☀️')+' '+phase.toUpperCase();
   ctx.save();
   ctx.globalAlpha=0.92;
-  ctx.fillStyle='rgba(0,0,0,0.6)';ctx.beginPath();ctx.roundRect(wx-12,wy-14,170,46,10);ctx.fill();
-  // Phase icon + label
-  ctx.font='bold 12px Nunito,sans-serif';ctx.fillStyle=col;ctx.textAlign='left';ctx.textBaseline='top';
-  ctx.fillText((icons[phase]||'☀️')+' '+phase.toUpperCase(),wx,wy-2);
-  // Big digital clock
-  ctx.font='bold 22px "Black Han Sans",sans-serif';ctx.fillStyle='#ffffff';ctx.textAlign='center';
-  ctx.fillText(timeStr, wx+73, wy+14);
-  ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.restore();
+  // Background box
+  ctx.fillStyle='rgba(0,0,0,0.68)';
+  ctx.beginPath();ctx.roundRect(wx,wy,120,44,10);ctx.fill();
+  // Time digits — large, top-aligned
+  ctx.font='bold 24px "Black Han Sans",sans-serif';
+  ctx.fillStyle='#ffffff';
+  ctx.textAlign='center';
+  ctx.textBaseline='top';
+  ctx.fillText(timeStr, wx+60, wy+5);
+  // Phase label — small, below the time
+  ctx.font='bold 10px Nunito,sans-serif';
+  ctx.fillStyle='rgba(255,255,255,0.5)';
+  ctx.fillText(phaseLabel, wx+60, wy+31);
+  ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  ctx.restore();
 }
 
 function drawRipples(){ripples.forEach(r=>{ctx.save();ctx.globalAlpha=r.alpha;ctx.strokeStyle='rgba(150,220,255,0.8)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(r.x,r.y,r.r,0,Math.PI*2);ctx.stroke();ctx.restore();});}
+
+function drawCarpBubbles(){
+  if(carpBubbles.length===0)return;
+  ctx.save();
+  carpBubbles.forEach(b=>{
+    ctx.globalAlpha=b.alpha*0.65;
+    ctx.strokeStyle='rgba(180,230,255,0.9)';
+    ctx.lineWidth=1;
+    ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.stroke();
+    ctx.globalAlpha=b.alpha*0.18;
+    ctx.fillStyle='rgba(220,245,255,1)';
+    ctx.beginPath();ctx.arc(b.x-b.r*0.3,b.y-b.r*0.3,b.r*0.35,0,Math.PI*2);ctx.fill();
+  });
+  ctx.restore();
+}
 
 // ═══════════════════════════════════════════════════
 //  START
