@@ -137,28 +137,136 @@
   @keyframes reelPulse { from{box-shadow:3px 4px 0 #6a0a0a,4px 6px 18px rgba(245,80,80,0.35)} to{box-shadow:3px 4px 0 #6a0a0a,4px 6px 28px rgba(245,80,80,0.7)} }
   @keyframes reelActive { from{transform:translateX(4px) scale(1.06)} to{transform:translateX(6px) scale(1.1)} }
 
-  /* ── TENSION BAR ── */
+  /* ── FIGHT HUD (unified panel replacing old tension-hud) ── */
   #tension-hud {
     display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
-    width:min(340px,88vw); background:rgba(0,0,0,0.78); border:2px solid rgba(255,255,255,0.15);
-    border-radius:14px; padding:10px 16px 12px; z-index:98; pointer-events:none;
-    box-shadow:0 4px 24px rgba(0,0,0,0.6); backdrop-filter:blur(6px);
-    transition:border-color 0.2s;
+    width:min(380px,92vw);
+    background:linear-gradient(160deg,rgba(6,14,10,0.96) 0%,rgba(10,20,14,0.96) 100%);
+    border:2px solid rgba(56,217,192,0.2);
+    border-radius:20px; padding:14px 16px 16px; z-index:98; pointer-events:none;
+    box-shadow:0 8px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04);
+    backdrop-filter:blur(8px);
+    transition:border-color 0.2s, box-shadow 0.2s;
   }
   #tension-hud.show { display:block; }
-  #tension-hud.danger { border-color:rgba(240,69,69,0.7); animation:tensionPulse 0.4s infinite alternate; }
-  @keyframes tensionPulse { from{box-shadow:0 4px 24px rgba(0,0,0,0.6)} to{box-shadow:0 4px 30px rgba(240,69,69,0.5)} }
-  #tension-label { font-size:0.62rem; font-weight:900; text-transform:uppercase; letter-spacing:2px; color:rgba(255,255,255,0.6); margin-bottom:6px; text-align:center; }
-  #tension-track { width:100%; height:22px; background:rgba(255,255,255,0.07); border-radius:8px; overflow:hidden; position:relative; }
+  #tension-hud.danger {
+    border-color:rgba(240,69,69,0.8);
+    box-shadow:0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(240,69,69,0.2), 0 0 30px rgba(240,69,69,0.3);
+    animation:tensionPulse 0.35s infinite alternate;
+  }
+  @keyframes tensionPulse {
+    from{box-shadow:0 8px 40px rgba(0,0,0,0.7),0 0 0 1px rgba(240,69,69,0.2),0 0 20px rgba(240,69,69,0.2)}
+    to{box-shadow:0 8px 40px rgba(0,0,0,0.7),0 0 0 2px rgba(240,69,69,0.5),0 0 40px rgba(240,69,69,0.5)}
+  }
+
+  /* Fish name & phase row */
+  #fight-fish-row {
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;
+  }
+  #fight-fish-name {
+    font-family:'Black Han Sans',sans-serif; font-size:1.05rem; letter-spacing:2px;
+    background:linear-gradient(135deg,#f0c040,#6ddb4a);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  #fight-phase-badge {
+    font-size:0.6rem; font-weight:900; text-transform:uppercase; letter-spacing:1.5px;
+    padding:3px 9px; border-radius:20px; border:1.5px solid;
+    transition:all 0.4s;
+  }
+  #fight-phase-badge.fresh  { color:#6ddb4a; border-color:#6ddb4a; background:rgba(109,219,74,0.1); }
+  #fight-phase-badge.tiring { color:#f0c040; border-color:#f0c040; background:rgba(240,192,64,0.1); }
+  #fight-phase-badge.exhausted { color:#f04545; border-color:#f04545; background:rgba(240,69,69,0.12);
+    animation:badgePulse 0.6s infinite alternate; }
+  @keyframes badgePulse { from{opacity:0.7} to{opacity:1} }
+
+  /* Status banner */
+  #fight-status-banner {
+    text-align:center; font-size:0.72rem; font-weight:900; letter-spacing:1px;
+    padding:7px 10px; border-radius:10px; margin-bottom:10px;
+    transition:background 0.3s, color 0.3s;
+  }
+  #fight-status-banner.running {
+    background:rgba(240,69,69,0.18); color:#ff7070; border:1px solid rgba(240,69,69,0.3);
+  }
+  #fight-status-banner.reeling {
+    background:rgba(58,184,245,0.15); color:#6dd4f8; border:1px solid rgba(58,184,245,0.25);
+  }
+  #fight-status-banner.resting {
+    background:rgba(109,219,74,0.12); color:#8deb6a; border:1px solid rgba(109,219,74,0.2);
+  }
+  #fight-status-banner.danger-run {
+    background:rgba(240,69,69,0.28); color:#ff4040;
+    border:1px solid rgba(240,69,69,0.5);
+    animation:statusFlash 0.4s infinite alternate;
+  }
+  @keyframes statusFlash { from{background:rgba(240,69,69,0.2)} to{background:rgba(240,69,69,0.4)} }
+
+  /* Dual bars container */
+  .fight-bars { display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
+
+  /* Tension bar */
+  .fight-bar-row { display:flex; align-items:center; gap:8px; }
+  .fight-bar-label {
+    font-size:0.56rem; font-weight:900; text-transform:uppercase; letter-spacing:1.5px;
+    color:rgba(255,255,255,0.45); width:46px; flex-shrink:0;
+  }
+  .fight-bar-outer {
+    flex:1; height:20px; background:rgba(255,255,255,0.06);
+    border-radius:6px; overflow:hidden; position:relative;
+    border:1px solid rgba(255,255,255,0.07);
+  }
   #tension-fill {
-    height:100%; border-radius:8px; width:0%;
+    height:100%; width:0%; border-radius:6px;
     background:linear-gradient(to right,#3ddb3d 0%,#f0c040 45%,#f07830 75%,#f04545 100%);
-    background-size:340px 100%; background-position:0 0;
-    transition:width 0.12s ease-out;
+    background-size:380px 100%;
+    transition:width 0.1s ease-out;
     position:relative;
   }
-  #tension-fill::after { content:attr(data-pct); position:absolute; right:8px; top:50%; transform:translateY(-50%); font-size:0.78rem; font-weight:900; color:#fff; white-space:nowrap; }
-  #tension-warn { text-align:center; font-size:0.72rem; font-weight:900; color:#ff5050; height:18px; margin-top:4px; }
+  #tension-fill::after {
+    content:attr(data-pct); position:absolute; right:7px; top:50%;
+    transform:translateY(-50%); font-size:0.72rem; font-weight:900; color:rgba(255,255,255,0.9);
+    white-space:nowrap; text-shadow:0 1px 3px rgba(0,0,0,0.8);
+  }
+
+  /* Stamina bar */
+  #stamina-fill {
+    height:100%; width:100%; border-radius:6px;
+    transition:width 0.3s ease-out, background 0.5s;
+    background:linear-gradient(to right,#f04545,#f0c040,#6ddb4a);
+    background-size:380px 100%;
+  }
+
+  /* Sweet spot zone overlay on tension bar */
+  #sweet-spot {
+    position:absolute; top:0; height:100%; width:18%;
+    background:rgba(109,219,74,0.25); border-left:2px solid rgba(109,219,74,0.7);
+    border-right:2px solid rgba(109,219,74,0.7);
+    transition:left 0.15s ease-out;
+    pointer-events:none;
+  }
+  #sweet-spot::after {
+    content:'●'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    font-size:8px; color:rgba(109,219,74,0.9);
+  }
+  #tension-warn { text-align:center; font-size:0.68rem; font-weight:900; color:#ff5050; min-height:16px; margin-top:2px; }
+
+  /* Tug indicator */
+  #tug-indicator {
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    margin-top:8px; font-size:0.6rem; font-weight:900; letter-spacing:1.5px;
+    text-transform:uppercase; color:rgba(255,255,255,0.3);
+  }
+  .tug-arrow { font-size:0.9rem; transition:all 0.2s; }
+  #tug-indicator.active-reel .tug-arrow.right { color:#38d9c0; transform:scale(1.4); }
+  #tug-indicator.active-run  .tug-arrow.left  { color:#f04545; transform:scale(1.4); animation:tugPulse 0.3s infinite alternate; }
+  @keyframes tugPulse { from{transform:scale(1.2)} to{transform:scale(1.6)} }
+
+  /* Rod bend icon */
+  #rod-bend-icon {
+    position:absolute; top:14px; right:16px; font-size:1.6rem; line-height:1;
+    transition:transform 0.2s, filter 0.2s;
+    pointer-events:none;
+  }
 
   /* ── UNIFIED SIDE PANEL ── */
   #side-panel { display:none; position:fixed; top:var(--hdr); bottom:var(--ftr); right:0; width:min(360px,95vw);
@@ -514,10 +622,32 @@
   </button>
 </div>
 
-<!-- TENSION BAR HUD -->
+<!-- FIGHT HUD (unified) -->
 <div id="tension-hud">
-  <div id="tension-label">⚡ LINE STRAIN</div>
-  <div id="tension-track"><div id="tension-fill"></div></div>
+  <span id="rod-bend-icon">🎣</span>
+  <div id="fight-fish-row">
+    <div id="fight-fish-name">FISH ON!</div>
+    <div id="fight-phase-badge" class="fresh">💪 FRESH</div>
+  </div>
+  <div id="fight-status-banner" class="resting">💤 RESTING — Hold REEL to bring it in!</div>
+  <div class="fight-bars">
+    <div class="fight-bar-row">
+      <div class="fight-bar-label">⚡ LINE</div>
+      <div class="fight-bar-outer">
+        <div id="tension-fill" data-pct="0%"></div>
+        <div id="sweet-spot" style="left:30%"></div>
+      </div>
+    </div>
+    <div class="fight-bar-row">
+      <div class="fight-bar-label">💪 FISH</div>
+      <div class="fight-bar-outer"><div id="stamina-fill"></div></div>
+    </div>
+  </div>
+  <div id="tug-indicator">
+    <span class="tug-arrow left">◀◀</span>
+    <span style="letter-spacing:2px">TUG-O-WAR</span>
+    <span class="tug-arrow right">▶▶</span>
+  </div>
   <div id="tension-warn"></div>
 </div>
 <div id="side-panel">
@@ -633,6 +763,9 @@ let tension = 0;
 let isReelIn = false;
 let groundBaitStock = 5;
 let reelVelocity = 0; // eased reel speed
+let sweetSpotPos = 30;  // fight sweet-spot zone position (%)
+let sweetSpotDir = 1;
+let sweetSpotInZone = false;
 
 // Rod/Reel gear
 const rodTiers = [
@@ -1627,10 +1760,25 @@ function updateSideBtns() {
 
   if(inFight){
     const danger = fishRunning && isReeling;
+    const sweetMode = sweetSpotInZone && isReeling && !fishRunning;
     fabReel.classList.toggle('danger', danger);
     fabReel.classList.toggle('reeling', isReeling && !danger);
-    fabIcon.textContent = isReeling ? '🎣' : '🔄';
-    fabLbl.textContent = isReeling ? 'REELING' : 'HOLD REEL';
+    if (sweetMode) {
+      fabIcon.textContent = '⭐';
+      fabLbl.textContent = 'SWEET SPOT!';
+    } else if (danger) {
+      fabIcon.textContent = '⚠️';
+      fabLbl.textContent = 'RELEASE!';
+    } else if (isReeling) {
+      fabIcon.textContent = '🎣';
+      fabLbl.textContent = 'REELING';
+    } else if (fishRunning) {
+      fabIcon.textContent = '🏃';
+      fabLbl.textContent = 'WAIT...';
+    } else {
+      fabIcon.textContent = '🔄';
+      fabLbl.textContent = 'HOLD REEL';
+    }
   } else {
     fabReel.classList.remove('danger','reeling');
     fabIcon.textContent='🔄'; fabLbl.textContent='REEL IN';
@@ -1670,24 +1818,93 @@ function execCast() {
 function fabReelDown(e) { e.preventDefault(); ensureAudio(); isReeling=true; updateSideBtns(); }
 function fabReelUp(e) { e.preventDefault(); isReeling=false; updateSideBtns(); }
 
+// Sweet-spot phase — the ideal tension zone drifts over time
+
 function updateTensionHUD() {
   const hud = document.getElementById('tension-hud');
   const fill = document.getElementById('tension-fill');
   const warn = document.getElementById('tension-warn');
-  const label = document.getElementById('tension-label');
+  const staminaFill = document.getElementById('stamina-fill');
   const inFight = gameState === 'fish-hooked';
   hud.classList.toggle('show', inFight);
   if (!inFight) return;
+
   const reel = getActiveReel();
   const pct = Math.min(100, Math.round((tension / reel.tensionMax) * 100));
   fill.style.width = pct + '%';
   fill.setAttribute('data-pct', pct + '%');
+
+  // Tension danger state
   const danger = pct > 75;
-  const warning = pct > 45;
   hud.classList.toggle('danger', danger);
-  label.textContent = `⚡ LINE STRAIN  [${reel.name}]`;
-  label.style.color = danger ? '#ff6666' : warning ? '#f0a030' : 'rgba(255,255,255,0.6)';
-  warn.textContent = pct >= 90 ? '⚠ ABOUT TO SNAP — RELEASE REEL!' : (pct > 75 ? '⚠ HIGH TENSION — ease off!' : '');
+
+  // Stamina bar — reversed: green=full, red=empty
+  const stamPct = Math.max(0, fishStamina);
+  staminaFill.style.width = stamPct + '%';
+  // Stamp bar color driven by position on gradient
+  const stamFraction = stamPct / 100;
+  const stamBackgroundPos = ((1 - stamFraction) * 380) + 'px 0';
+  staminaFill.style.backgroundPosition = stamBackgroundPos;
+
+  // Fish name & phase
+  const fishNameEl = document.getElementById('fight-fish-name');
+  if (hookedFish) fishNameEl.textContent = (hookedFish.emoji || '🐟') + ' ' + hookedFish.type.toUpperCase();
+
+  const phaseBadge = document.getElementById('fight-phase-badge');
+  if (fishStamina > 60) {
+    phaseBadge.className = 'fresh'; phaseBadge.textContent = '💪 FRESH';
+  } else if (fishStamina > 25) {
+    phaseBadge.className = 'tiring'; phaseBadge.textContent = '😤 TIRING';
+  } else {
+    phaseBadge.className = 'exhausted'; phaseBadge.textContent = '😵 EXHAUSTED';
+  }
+
+  // Status banner
+  const banner = document.getElementById('fight-status-banner');
+  const dangerRun = fishRunning && isReeling;
+  if (dangerRun) {
+    banner.className = 'danger-run'; banner.textContent = '⚠️ RUNNING — RELEASE REEL or line SNAPS!';
+  } else if (fishRunning) {
+    banner.className = 'running'; banner.textContent = '🏃 FISH RUNNING — Wait for it to tire...';
+  } else if (isReeling) {
+    banner.className = 'reeling'; banner.textContent = '🔄 REELING IN — Keep holding!';
+  } else {
+    banner.className = 'resting'; banner.textContent = '💤 RESTING — Hold REEL button to bring it in!';
+  }
+
+  // Sweet-spot drift
+  sweetSpotPos += sweetSpotDir * 0.18;
+  if (sweetSpotPos > 72 || sweetSpotPos < 10) sweetSpotDir *= -1;
+  sweetSpotPos = Math.max(8, Math.min(74, sweetSpotPos));
+  const ss = document.getElementById('sweet-spot');
+  ss.style.left = sweetSpotPos + '%';
+  // Glow when tension is in sweet zone
+  const wasInZone = sweetSpotInZone;
+  sweetSpotInZone = (pct >= sweetSpotPos && pct <= sweetSpotPos + 18);
+  // Play a soft chime when entering the sweet zone
+  if (sweetSpotInZone && !wasInZone && isReeling && !fishRunning) {
+    playTone(880, 'sine', 0.12, 0.08);
+    setTimeout(()=>playTone(1320, 'sine', 0.10, 0.06), 80);
+  }
+  ss.style.background = sweetSpotInZone
+    ? 'rgba(109,219,74,0.45)' : 'rgba(109,219,74,0.18)';
+  ss.style.boxShadow = sweetSpotInZone ? '0 0 12px rgba(109,219,74,0.5)' : 'none';
+
+  // Tug indicator
+  const tug = document.getElementById('tug-indicator');
+  if (isReeling && !fishRunning) { tug.className='active-reel'; }
+  else if (fishRunning) { tug.className='active-run'; }
+  else { tug.className=''; }
+
+  // Rod bend icon
+  const rodIcon = document.getElementById('rod-bend-icon');
+  const bendDeg = Math.min(45, pct * 0.45);
+  rodIcon.style.transform = `rotate(${bendDeg}deg)`;
+  rodIcon.style.filter = pct > 75 ? `drop-shadow(0 0 8px rgba(240,69,69,0.8))` : `drop-shadow(0 0 4px rgba(56,217,192,0.4))`;
+
+  // Warning text
+  warn.textContent = pct >= 90 ? '⚠ ABOUT TO SNAP — RELEASE REEL NOW!' : (pct > 75 ? '⚠ HIGH TENSION — ease off!' : sweetSpotInZone ? '✅ SWEET SPOT — Keep reeling!' : '');
+  warn.style.color = pct >= 90 ? '#ff3030' : pct > 75 ? '#f07830' : '#6ddb4a';
 }
 
 // ── Journal & Encyc -- now handled by unified panel (shims above)
@@ -1813,6 +2030,8 @@ function hookFish(f) {
   runTimer=3000+Math.random()*4000+f.size*80;
   tension=0; lineHealth=100; isReeling=false;
   fishStamina=100; reelVelocity=0;
+  sweetSpotPos = 20 + Math.random()*40;  // randomise starting position
+  sweetSpotDir = Math.random() > 0.5 ? 1 : -1;
   const peg=pegs.find(p=>p.id===selectedPeg);
   hookedFish.angle=Math.atan2(f.y-peg.y,f.x-peg.x)+(Math.random()-0.5)*0.5;
   updateSideBtns(); updateStateIndicator();
@@ -2162,71 +2381,96 @@ function updateFish(s) {
 }
 
 function updateHookedFish(s) {
-  if(gameState!=='fish-hooked'||!hookedFish) return;  const peg = pegs.find(p=>p.id===selectedPeg);
+  if(gameState!=='fish-hooked'||!hookedFish) return;
+  const peg = pegs.find(p=>p.id===selectedPeg);
   const reel = getActiveReel();
-  const tensionMax = reel.tensionMax; // e.g. 100 / 130 / 175
-  const reelMult = reel.reelMult;     // e.g. 1.0 / 1.4 / 1.9
+  const tensionMax = reel.tensionMax;
+  const reelMult = reel.reelMult;
   const msPerFrame = dt * 1000;
+
+  // Fish phase modifiers (fresh = strong/unpredictable, exhausted = slow/weaker)
+  const freshPhase  = fishStamina > 60;
+  const tiringPhase = fishStamina > 25 && fishStamina <= 60;
+  const exhaustedPhase = fishStamina <= 25;
 
   if(fishRunning){
     runTimer -= msPerFrame;
-    // Fish stamina drains while running — more so if we're reeling
-    fishStamina -= (isReeling ? 0.18 : 0.08) * s;
-    // Tired fish run shorter; speed scales with stamina
-    const fatigueSpeed = 0.5 + (fishStamina/100)*0.5;
-    if(Math.random()<0.04*s) hookedFish.angle += (Math.random()-0.5)*1.4;
-    const rs = hookedFish.speed * (2.5 + hookedFish.size*0.04) * fatigueSpeed;
+    // Stamina drains faster if we reel against the fish
+    fishStamina -= (isReeling ? 0.22 : 0.07) * s;
+
+    const fatigueSpeed = 0.45 + (fishStamina/100)*0.55;
+
+    // Fresh fish: erratic angle changes and powerful runs
+    // Tiring: less erratic, slower
+    // Exhausted: slow, mostly straight toward edge
+    const zigzagRate = freshPhase ? 0.07 : tiringPhase ? 0.03 : 0.01;
+    if(Math.random() < zigzagRate * s) {
+      const zigStrength = freshPhase ? 2.2 : 1.0;
+      hookedFish.angle += (Math.random()-0.5) * zigStrength;
+    }
+
+    // Fresh fish occasionally make sharp direction reversal darts
+    if(freshPhase && Math.random() < 0.015 * s) {
+      hookedFish.angle = Math.atan2(hookedFish.y-peg.y, hookedFish.x-peg.x) + (Math.random()-0.5)*2.5;
+    }
+
+    const speedMultiplier = freshPhase ? 1.0 : tiringPhase ? 0.72 : 0.4;
+    const rs = hookedFish.speed * (2.5 + hookedFish.size*0.04) * fatigueSpeed * speedMultiplier;
     hookedFish.x += Math.cos(hookedFish.angle)*rs*s;
     hookedFish.y += Math.sin(hookedFish.angle)*rs*s;
-    hookedFish.tailPhase += 0.28*s;
+    hookedFish.tailPhase += (freshPhase ? 0.35 : 0.2) * s;
 
     const dx=hookedFish.x-LAKE_CENTER.x, dy=hookedFish.y-LAKE_CENTER.y, ed=Math.hypot(dx/LAKE_RX,dy/LAKE_RY);
     if(ed>0.90){ hookedFish.angle=Math.atan2(-dy,-dx)+(Math.random()-0.5)*0.6; hookedFish.x=LAKE_CENTER.x+(dx/ed)*LAKE_RX*0.87; hookedFish.y=LAKE_CENTER.y+(dy/ed)*LAKE_RY*0.87; }
 
     floatPos = {x:hookedFish.x, y:hookedFish.y};
 
-    if(isReeling) tension += 2.4*s;
-    else tension -= 1.0*s;
+    // Tension rises faster for fresh/strong fish
+    const tensionRise = freshPhase ? 3.2 : tiringPhase ? 2.4 : 1.4;
+    if(isReeling) tension += tensionRise * s;
+    else tension -= 1.2 * s;
 
-    // Exhausted fish — shorter run timer, then rests
     const staminaMod = 0.4 + (fishStamina/100)*0.6;
     if(runTimer<=0){
       fishRunning = false;
-      restTimer = Math.max(1200, (4500-hookedFish.size*60+Math.random()*3000) * staminaMod);
+      restTimer = Math.max(800, (4500-hookedFish.size*60+Math.random()*3000) * staminaMod);
     }
 
   } else {
     restTimer -= msPerFrame;
-    hookedFish.tailPhase += 0.035*s;
-    // Fish slowly recovers stamina while resting (but less so for exhausted fish)
-    fishStamina = Math.max(0, Math.min(100, fishStamina + 0.04*s));
+    // Resting recovery — exhausted fish recover less
+    const recoverRate = exhaustedPhase ? 0.015 : freshPhase ? 0.06 : 0.035;
+    fishStamina = Math.max(0, Math.min(100, fishStamina + recoverRate * s));
 
     if(isReeling){
       const dx=peg.x-hookedFish.x, dy=peg.y-hookedFish.y, d=Math.hypot(dx,dy);
       if(d<200){ catchFish(); return; }
-      const targetSpeed = 2.5 * reelMult;
-      reelVelocity += (targetSpeed - reelVelocity) * 0.06 * s; // ease in
+
+      // Sweet-spot bonus: reel faster when tension is in green zone
+      const sweetBonus = sweetSpotInZone ? 1.5 : 1.0;
+      const targetSpeed = 2.5 * reelMult * sweetBonus;
+      reelVelocity += (targetSpeed - reelVelocity) * 0.06 * s;
       hookedFish.x += dx/d*reelVelocity*s;
       hookedFish.y += dy/d*reelVelocity*s;
       floatPos = {x:hookedFish.x, y:hookedFish.y};
-      tension -= 0.5*s;
+      tension -= 0.5 * s;
     } else {
-      reelVelocity += (0 - reelVelocity) * 0.12 * s; // ease out
-      tension -= 1.2*s;
+      reelVelocity += (0 - reelVelocity) * 0.12 * s;
+      tension -= 1.2 * s;
     }
 
     if(restTimer<=0){
       fishRunning = true;
-      // Exhausted fish: shorter runs
-      const staminaMod = 0.3 + (fishStamina/100)*0.7;
-      runTimer = (1500 + Math.random()*2500 + hookedFish.size*40) * staminaMod;
-      hookedFish.angle = Math.atan2(hookedFish.y-peg.y, hookedFish.x-peg.x) + (Math.random()-0.5)*1.0;
+      const staminaMod = exhaustedPhase ? 0.2 : tiringPhase ? 0.5 : 0.9;
+      runTimer = (1500 + Math.random()*2500 + hookedFish.size*40) * (staminaMod + 0.1);
+      // Exhausted fish: mostly run toward edge weakly; fresh fish: run away from peg aggressively
+      const angleVariance = exhaustedPhase ? 1.8 : tiringPhase ? 1.2 : 0.8;
+      hookedFish.angle = Math.atan2(hookedFish.y-peg.y, hookedFish.x-peg.x) + (Math.random()-0.5)*angleVariance;
     }
   }
 
-  // Scale tension against equipped reel's max (snap at tensionMax%)
-  const normTension = (tension / tensionMax) * 100;
   tension = Math.max(0, Math.min(tensionMax, tension));
+  const normTension = (tension / tensionMax) * 100;
   if(normTension >= 100){ fishEscaped(); return; }
   updateSideBtns();
   updateTensionHUD();
@@ -2651,41 +2895,56 @@ function drawAimingArc() {
 
 function drawFightOverlay() {
   if(gameState!=='fish-hooked'||!hookedFish)return;
-  const vp=document.getElementById('viewport'),vpCX=(vp.clientWidth/2-viewX)/viewScale,vpCY=(vp.clientHeight/2-viewY)/viewScale,vpHh=vp.clientHeight/2/viewScale,vpHw=vp.clientWidth/2/viewScale;
+  const vp=document.getElementById('viewport'),vpCX=(vp.clientWidth/2-viewX)/viewScale,vpCY=(vp.clientHeight/2-viewY)/viewScale,vpHh=vp.clientHeight/2/viewScale;
   ctx.save();
 
-  // Status banner at top
-  const bY=vpCY-vpHh+28,bX=vpCX;
-  let bC,bT;
-  if(fishRunning){
-    bC='rgba(160,15,15,0.90)';
-    bT= isReeling ? '⚠️ RUNNING — RELEASE REEL or line will snap!' : '🏃 FISH RUNNING — Wait for it to tire...';
+  // Slim pulsing status strip at top of viewport (keeps the in-world feel)
+  const bY=vpCY-vpHh+22,bX=vpCX;
+  const dangerRun = fishRunning && isReeling;
+  const alpha = 0.55 + 0.25*Math.sin(bobPhase*6);
+  let bC, bT;
+  if(dangerRun){
+    bC=`rgba(180,20,20,${alpha})`;
+    bT='⚠️ RUNNING — RELEASE REEL!';
+  } else if(fishRunning){
+    bC='rgba(100,10,10,0.65)';
+    bT='🏃 FISH RUNNING';
   } else if(isReeling){
-    bC='rgba(15,90,15,0.90)';
-    bT='🔄 REELING IN — Keep holding!';
+    bC= sweetSpotInZone ? 'rgba(15,110,15,0.75)' : 'rgba(10,70,10,0.65)';
+    bT= sweetSpotInZone ? '⭐ SWEET SPOT!' : '🔄 REELING IN';
   } else {
-    bC='rgba(14,36,14,0.88)';
-    bT='💤 RESTING — Hold REEL button to bring it in!';
+    bC='rgba(14,36,14,0.55)';
+    bT='💤 RESTING';
   }
-  ctx.fillStyle=bC;ctx.beginPath();ctx.roundRect(bX-210,bY-14,420,30,6);ctx.fill();
-  ctx.fillStyle='#ffffff';ctx.font='bold 13px Nunito,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(bT,bX,bY);
+  ctx.fillStyle=bC; ctx.beginPath(); ctx.roundRect(bX-130,bY-12,260,26,5); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.font='bold 11px Nunito,sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(bT,bX,bY);
 
-  // Tension bar — normalised to reel's tensionMax
-  const reel=getActiveReel(), tensionMax=reel.tensionMax;
-  const tensionNorm=(tension/tensionMax)*100; // 0–100% of breaking point
-  const t75=tensionNorm>75, t45=tensionNorm>45;
-  const mW=Math.min(340,vpHw*1.6),mH=28,mX=vpCX-mW/2,mY=vpCY+vpHh-80;
-  ctx.fillStyle='rgba(0,0,0,0.7)';ctx.beginPath();ctx.roundRect(mX-14,mY-26,mW+28,mH+48,10);ctx.fill();
-  ctx.strokeStyle=t75?'#f04545':t45?'#f07830':'rgba(255,255,255,0.2)';ctx.lineWidth=t75?2.5:1.5;
-  if(t75){ctx.globalAlpha=0.6+0.4*Math.sin(bobPhase*8);ctx.stroke();ctx.globalAlpha=1;}else ctx.stroke();
-  ctx.fillStyle=t75?'#ff6666':t45?'#f0a030':'rgba(255,255,255,0.75)';ctx.font='bold 10px Nunito,sans-serif';ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.fillText(`⚡ LINE STRAIN  [${reel.name}]`,mX+mW/2,mY-8);
-  ctx.fillStyle='rgba(255,255,255,0.08)';ctx.beginPath();ctx.roundRect(mX,mY,mW,mH,6);ctx.fill();
-  const dX=mX+mW*0.85;ctx.strokeStyle='rgba(240,69,69,0.5)';ctx.lineWidth=1.5;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(dX,mY);ctx.lineTo(dX,mY+mH);ctx.stroke();ctx.setLineDash([]);
-  const fW=(tensionNorm/100)*mW,fG=ctx.createLinearGradient(mX,0,mX+mW,0);fG.addColorStop(0,'#3ddb3d');fG.addColorStop(0.45,'#f0c040');fG.addColorStop(0.75,'#f07830');fG.addColorStop(1.0,'#f04545');
-  ctx.fillStyle=fG;ctx.beginPath();ctx.roundRect(mX,mY,fW,mH,6);ctx.fill();
-  if(tensionNorm>70){const gA=(tensionNorm-70)/30*0.5;ctx.fillStyle=`rgba(240,69,69,${gA})`;ctx.beginPath();ctx.roundRect(mX,mY,fW,mH,6);ctx.fill();}
-  ctx.fillStyle='#ffffff';ctx.font=`bold ${mH*0.62}px Nunito,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(Math.round(tensionNorm)+'%',mX+mW/2,mY+mH/2);
-  if(tensionNorm>=90){const wA=0.5+0.5*Math.sin(bobPhase*10);ctx.fillStyle=`rgba(240,30,30,${wA})`;ctx.font='bold 15px Nunito,sans-serif';ctx.textAlign='center';ctx.fillText('⚠ ABOUT TO SNAP — RELEASE REEL!',mX+mW/2,mY+mH+18);}
+  // Fishing line from peg to fish — color/thickness reflects tension
+  const peg=pegs.find(p=>p.id===selectedPeg);
+  if(peg && floatPos){
+    const reel=getActiveReel(), tensionNorm=(tension/reel.tensionMax)*100;
+    const lineAlpha = 0.5 + tensionNorm*0.004;
+    const lineW = 1.5 + tensionNorm*0.025;
+    // Line colour: green → orange → red
+    const lR = tensionNorm<45 ? Math.round(tensionNorm/45*100) : 255;
+    const lG = tensionNorm>75 ? Math.round((100-tensionNorm)/25*200) : 200;
+    ctx.strokeStyle=`rgba(${lR},${lG},30,${lineAlpha})`;
+    ctx.lineWidth = lineW;
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(peg.x,peg.y); ctx.lineTo(floatPos.x,floatPos.y); ctx.stroke();
+
+    // Tension vibration effect on high strain
+    if(tensionNorm > 70){
+      const vib = (tensionNorm-70)/30;
+      const midX=(peg.x+floatPos.x)/2+Math.sin(bobPhase*18)*vib*12;
+      const midY=(peg.y+floatPos.y)/2+Math.cos(bobPhase*18)*vib*12;
+      ctx.globalAlpha = vib*0.5; ctx.strokeStyle='rgba(240,80,30,0.8)';
+      ctx.lineWidth=lineW*1.8; ctx.beginPath(); ctx.moveTo(peg.x,peg.y); ctx.quadraticCurveTo(midX,midY,floatPos.x,floatPos.y); ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+  }
+
   ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.restore();
 }
 
